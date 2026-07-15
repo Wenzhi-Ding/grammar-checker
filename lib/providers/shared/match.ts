@@ -2,10 +2,12 @@
 import { diff_match_patch } from "diff-match-patch";
 import type { Correction, PinnedCorrection } from "./schema";
 
-const dmp = new diff_match_patch();
-
 export const MATCH_THRESHOLD = 0.5;
 export const MATCH_DISTANCE = 1000;
+
+const dmp = new diff_match_patch();
+dmp.Match_Threshold = MATCH_THRESHOLD;
+dmp.Match_Distance = MATCH_DISTANCE;
 
 let idCounter = 0;
 const nextId = () => `c${++idCounter}`;
@@ -16,7 +18,25 @@ function pinOne(text: string, original: string, cursor: number): { start: number
   if (exact >= 0) {
     return { start: exact, end: exact + original.length, tier: 1 };
   }
-  // Tier 2/3 stubbed for later tasks; for now return unmatched.
+
+  // Tier 2: diff-match-patch fuzzy locator
+  const idx = dmp.match_main(text, original, cursor);
+  if (idx >= 0) {
+    const windowLen = Math.ceil(original.length * 1.3) + 4;
+    const window = text.slice(idx, idx + windowLen);
+    const diffs = dmp.diff_main(original, window);
+    dmp.diff_cleanupSemantic(diffs);
+    let consumed = 0;
+    for (const [op, str] of diffs) {
+      if (op === 0) consumed += str.length;
+      else if (op === 1) consumed += str.length;
+      else if (op === -1) break;
+      if (consumed >= original.length) break;
+    }
+    const end = idx + Math.max(consumed, original.length);
+    return { start: idx, end, tier: 2 };
+  }
+
   return { start: -1, end: -1, tier: 3 };
 }
 

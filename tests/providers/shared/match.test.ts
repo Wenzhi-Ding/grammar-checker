@@ -35,3 +35,21 @@ describe("pinSpans Tier 1 (exact indexOf)", () => {
     expect(out[0].matchTier).toBe(3);
   });
 });
+
+describe("pinSpans Tier 2 (dmp fuzzy fallback)", () => {
+  it("recovers when LLM collapsed whitespace", () => {
+    // input has double space; LLM "normalized" original to single space
+    const text = "the  quick brown fox";
+    const out = pinSpans(text, [c("the quick")]);
+    expect(out[0].matchTier).toBe(2);
+    expect(out[0].start).toBe(0);
+    expect(out[0].end).toBeGreaterThanOrEqual(9);
+  });
+
+  it("recovers when LLM swapped smart quotes for straight", () => {
+    const text = "she said \u201Chello\u201D there";
+    const out = pinSpans(text, [c('she said "hello"')]);
+    expect(out[0].matchTier).toBe(2);
+    expect(out[0].start).toBe(0);
+  });
+});
