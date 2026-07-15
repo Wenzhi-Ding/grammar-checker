@@ -36,4 +36,16 @@ describe("callWithFallback", () => {
     ).rejects.toThrow("unauthorized");
     expect(proxyFetch).not.toHaveBeenCalled();
   });
+
+  it("throws (with status) when the proxy returns non-OK", async () => {
+    const direct = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const proxyFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 401,
+      json: async () => ({ error: "Invalid API key" }),
+    });
+    await expect(
+      callWithFallback(direct, { proxyBody: { provider: "x", payload: {} } }, proxyFetch),
+    ).rejects.toMatchObject({ status: 401, message: "Invalid API key" });
+  });
 });

@@ -59,9 +59,14 @@ export function useSettings() {
         next.baseURL = p.baseURL;
       }
       try {
-        const { apiKey, ...rest } = next;
-        const toStore = next.rememberKey ? next : rest;
-        window.localStorage.setItem(next.rememberKey ? STORAGE_KEY : STORAGE_KEY_NOSECRET, JSON.stringify(toStore));
+        if (next.rememberKey) {
+          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+          window.localStorage.removeItem(STORAGE_KEY_NOSECRET);
+        } else {
+          window.localStorage.removeItem(STORAGE_KEY);
+          const { apiKey: _apiKey, ...rest } = next;
+          window.localStorage.setItem(STORAGE_KEY_NOSECRET, JSON.stringify(rest));
+        }
       } catch {
         /* ignore quota errors */
       }

@@ -31,7 +31,12 @@ export async function callWithFallback<T = unknown>(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(opts.proxyBody),
     });
-    const body = (await res.json()) as T;
-    return { ok: res.ok, status: res.status, body };
+    const body = (await res.json()) as T & { error?: string };
+    if (!res.ok) {
+      const err = new Error(body.error ?? `proxy returned ${res.status}`) as Error & { status: number };
+      err.status = res.status;
+      throw err;
+    }
+    return { ok: true, status: res.status, body };
   }
 }

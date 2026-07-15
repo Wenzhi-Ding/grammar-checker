@@ -18,12 +18,3 @@ export function parsePolishResult(raw: string): PolishResult {
   const json = JSON.parse(raw);
   return PolishResultSchema.parse(json) as PolishResult;
 }
-
-export function isValidPolishResult(raw: string): boolean {
-  try {
-    parsePolishResult(raw);
-    return true;
-  } catch {
-    return false;
-  }
-}
