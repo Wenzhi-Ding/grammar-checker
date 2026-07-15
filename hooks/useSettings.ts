@@ -42,6 +42,10 @@ export function useSettings() {
   const [settings, setSettings] = useState<Settings>(DEFAULTS);
 
   useEffect(() => {
+    // Hydration-safe localStorage read: server + first client paint use DEFAULTS,
+    // then sync from storage after mount. (Lazy useState init would mismatch SSR HTML.)
+    // The fully-blessed alternative is useSyncExternalStore; deferred as a v1 simplification.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSettings(load());
   }, []);
 
