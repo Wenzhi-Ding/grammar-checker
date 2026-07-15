@@ -53,3 +53,12 @@ describe("pinSpans Tier 2 (dmp fuzzy fallback)", () => {
     expect(out[0].start).toBe(0);
   });
 });
+
+describe("pinSpans Tier 2 guardrail", () => {
+  it("downgrades a low-similarity fuzzy match to tier 3", () => {
+    const text = "the quick brown fox jumps over the lazy dog";
+    const out = pinSpans(text, [c("zzzzz qqqq unrelated gibberish phrase here")]);
+    expect(out[0].matchTier).toBe(3);
+    expect(out[0].start).toBe(-1);
+  });
+});

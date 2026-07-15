@@ -12,6 +12,14 @@ dmp.Match_Distance = MATCH_DISTANCE;
 let idCounter = 0;
 const nextId = () => `c${++idCounter}`;
 
+function similarity(a: string, b: string): number {
+  const diffs = dmp.diff_main(a, b);
+  dmp.diff_cleanupSemantic(diffs);
+  const equal = diffs.filter(([op]) => op === 0).reduce((n, [, s]) => n + s.length, 0);
+  const maxLen = Math.max(a.length, b.length, 1);
+  return equal / maxLen;
+}
+
 function pinOne(text: string, original: string, cursor: number): { start: number; end: number; tier: 1 | 2 | 3 } {
   // Tier 1: exact indexOf from cursor
   const exact = text.indexOf(original, cursor);
@@ -20,10 +28,19 @@ function pinOne(text: string, original: string, cursor: number): { start: number
   }
 
   // Tier 2: diff-match-patch fuzzy locator
-  const idx = dmp.match_main(text, original, cursor);
+  let idx: number;
+  try {
+    idx = dmp.match_main(text, original, cursor);
+  } catch {
+    idx = -1;
+  }
   if (idx >= 0) {
     const windowLen = Math.ceil(original.length * 1.3) + 4;
     const window = text.slice(idx, idx + windowLen);
+    // Guardrail: require high similarity, else drop (wrong pin is worse than no pin).
+    if (similarity(original, window.slice(0, original.length + 2)) < MATCH_THRESHOLD) {
+      return { start: -1, end: -1, tier: 3 };
+    }
     const diffs = dmp.diff_main(original, window);
     dmp.diff_cleanupSemantic(diffs);
     let consumed = 0;
