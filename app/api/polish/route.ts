@@ -10,8 +10,10 @@ export const dynamic = "force-dynamic";
 
 interface ProxyRequest {
   provider: ProviderPreset["id"];
-  text: string;
-  config: ProviderConfig;
+  payload: {
+    text: string;
+    config: ProviderConfig;
+  };
 }
 
 export async function POST(req: NextRequest) {
@@ -22,13 +24,13 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "invalid json body" }, { status: 400 });
   }
 
-  const { provider, text, config } = body;
-  if (!provider || !config?.apiKey || typeof text !== "string") {
-    return NextResponse.json({ error: "missing provider, config.apiKey, or text" }, { status: 400 });
+  const { provider, payload } = body;
+  if (!provider || !payload?.config?.apiKey || typeof payload?.text !== "string") {
+    return NextResponse.json({ error: "missing provider, payload.config.apiKey, or payload.text" }, { status: 400 });
   }
 
   try {
-    const result = await getProvider(provider).polish(text, config);
+    const result = await getProvider(provider).polish(payload.text, payload.config);
     return NextResponse.json(result);
   } catch (err) {
     const status = (err as Error & { status?: number }).status ?? 500;
