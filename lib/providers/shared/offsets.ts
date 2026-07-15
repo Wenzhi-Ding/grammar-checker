@@ -9,6 +9,7 @@ export function applyAccept(
 ): { text: string; suggestions: PinnedCorrection[] } {
   const target = suggestions.find((s) => s.id === id);
   if (!target) return { text, suggestions };
+  if (target.state !== "pending") return { text, suggestions };
 
   const replacement = replacementOverride ?? target.suggestion;
   const delta = replacement.length - (target.end - target.start);
@@ -16,7 +17,7 @@ export function applyAccept(
 
   const newSugs = suggestions.map((s) => {
     if (s.id === id) return { ...s, state: "accepted" as const };
-    if (s.start >= target.end) return { ...s, start: s.start + delta, end: s.end + delta };
+    if (s.state === "pending" && s.start >= target.end) return { ...s, start: s.start + delta, end: s.end + delta };
     return s;
   });
 
