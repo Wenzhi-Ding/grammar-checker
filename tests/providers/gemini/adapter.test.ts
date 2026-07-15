@@ -25,4 +25,12 @@ describe("gemini adapter", () => {
     const out = await provider.polish("teh", { apiKey: "k", model: "m", language: "en" });
     expect(out.corrections[0].suggestion).toBe("the");
   });
+
+  it("throws an Error with .status when gemini returns a non-OK response", async () => {
+    const fetcher = vi.fn().mockResolvedValue({ ok: false, status: 403, json: async () => ({}) });
+    const provider = createGeminiProvider({ fetchImpl: fetcher });
+    await expect(
+      provider.polish("hi", { apiKey: "bad", model: "gemini-3.5-flash", language: "en" }),
+    ).rejects.toMatchObject({ status: 403 });
+  });
 });

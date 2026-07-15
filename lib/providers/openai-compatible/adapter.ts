@@ -18,6 +18,9 @@ export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): 
       const lang = config.language && config.language !== "auto" ? config.language : detect(text);
       const framing = lang === "zh" ? CHINESE_FRAMING : ENGLISH_FRAMING;
       const baseURL = (config.baseURL ?? "").replace(/\/$/, "");
+      if (!baseURL) {
+        throw new Error("baseURL is required for openai-compatible providers");
+      }
 
       const messages = [
         { role: "system", content: assembleSystem(framing) },
