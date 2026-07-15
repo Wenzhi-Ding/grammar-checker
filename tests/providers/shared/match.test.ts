@@ -62,3 +62,15 @@ describe("pinSpans Tier 2 guardrail", () => {
     expect(out[0].start).toBe(-1);
   });
 });
+
+describe("pinSpans overlap removal", () => {
+  it("drops the lower-priority of two overlapping spans (keeps higher severity)", () => {
+    const text = "the quick brown fox";
+    const out = pinSpans(text, [c("quick", "X", "minor"), c("quick brown", "Y", "major")]);
+    const kept = out.filter((p) => p.state !== "superseded");
+    const sup = out.filter((p) => p.state === "superseded");
+    expect(kept).toHaveLength(1);
+    expect(kept[0].original).toBe("quick brown");
+    expect(sup).toHaveLength(1);
+  });
+});

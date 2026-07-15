@@ -57,11 +57,34 @@ function pinOne(text: string, original: string, cursor: number): { start: number
   return { start: -1, end: -1, tier: 3 };
 }
 
+const SEVERITY_WEIGHT: Record<NonNullable<Correction["severity"]>, number> = { major: 3, minor: 2, info: 1 };
+
+function removeOverlaps(pinned: PinnedCorrection[]): PinnedCorrection[] {
+  const valid = pinned.filter((p) => p.start >= 0);
+  valid.sort((a, b) => {
+    const sa = SEVERITY_WEIGHT[a.severity ?? "minor"];
+    const sb = SEVERITY_WEIGHT[b.severity ?? "minor"];
+    if (sb !== sa) return sb - sa;
+    const lenB = b.end - b.start;
+    const lenA = a.end - a.start;
+    if (lenB !== lenA) return lenB - lenA;
+    return a.start - b.start;
+  });
+  const claimed: Array<[number, number]> = [];
+  for (const p of valid) {
+    const overlaps = claimed.some(([s, e]) => p.start < e && p.end > s);
+    if (overlaps) p.state = "superseded";
+    else claimed.push([p.start, p.end]);
+  }
+  return pinned;
+}
+
 export function pinSpans(text: string, corrections: Correction[]): PinnedCorrection[] {
   let cursor = 0;
-  return corrections.map((correction) => {
+  const pinned = corrections.map((correction) => {
     const { start, end, tier } = pinOne(text, correction.original, cursor);
     if (tier === 1) cursor = end;
     return { ...correction, id: nextId(), start, end, matchTier: tier, state: "pending" as const };
   });
+  return removeOverlaps(pinned);
 }
