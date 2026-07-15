@@ -74,3 +74,33 @@ describe("pinSpans overlap removal", () => {
     expect(sup).toHaveLength(1);
   });
 });
+
+describe("pinSpans edge-case locks", () => {
+  it("empty original is tier 3, not a zero-width span", () => {
+    const text = "the quick brown fox";
+    const out = pinSpans(text, [c("")]);
+    expect(out[0].matchTier).toBe(3);
+    expect(out[0].start).toBe(-1);
+    expect(out[0].end).toBe(-1);
+  });
+
+  it("Tier-2 end never exceeds text.length (overflow guard)", () => {
+    // short text; non-verbatim long original lands near the end
+    const text = "the quick brown";
+    const out = pinSpans(text, [c("quick brown xyz extra")]);
+    if (out[0].matchTier === 2) {
+      expect(out[0].end).toBeLessThanOrEqual(text.length);
+    }
+    // regardless of tier, never overflow
+    expect(out[0].end).toBeLessThanOrEqual(text.length);
+    expect(out[0].start).toBeLessThanOrEqual(text.length);
+  });
+
+  it("adjacent (touching) spans are both kept, not superseded", () => {
+    const text = "the quick brown fox";
+    // "the" [0,3] and " quick"[3, ...] touch but don't overlap
+    const out = pinSpans(text, [c("the"), c("quick")]);
+    const pending = out.filter((p) => p.state === "pending");
+    expect(pending.length).toBeGreaterThanOrEqual(2);
+  });
+});

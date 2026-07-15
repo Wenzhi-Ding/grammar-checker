@@ -21,6 +21,11 @@ function similarity(a: string, b: string): number {
 }
 
 function pinOne(text: string, original: string, cursor: number): { start: number; end: number; tier: 1 | 2 | 3 } {
+  if (original === "") {
+    console.warn("unmatched", original);
+    return { start: -1, end: -1, tier: 3 };
+  }
+
   // Tier 1: exact indexOf from cursor
   const exact = text.indexOf(original, cursor);
   if (exact >= 0) {
@@ -39,6 +44,7 @@ function pinOne(text: string, original: string, cursor: number): { start: number
     const window = text.slice(idx, idx + windowLen);
     // Guardrail: require high similarity, else drop (wrong pin is worse than no pin).
     if (similarity(original, window.slice(0, original.length + 2)) < MATCH_THRESHOLD) {
+      console.warn("unmatched", original);
       return { start: -1, end: -1, tier: 3 };
     }
     const diffs = dmp.diff_main(original, window);
@@ -50,10 +56,11 @@ function pinOne(text: string, original: string, cursor: number): { start: number
       else if (op === -1) break;
       if (consumed >= original.length) break;
     }
-    const end = idx + Math.max(consumed, original.length);
+    const end = Math.min(idx + Math.max(consumed, original.length), text.length);
     return { start: idx, end, tier: 2 };
   }
 
+  console.warn("unmatched", original);
   return { start: -1, end: -1, tier: 3 };
 }
 
