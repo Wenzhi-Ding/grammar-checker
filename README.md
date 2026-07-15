@@ -1,36 +1,42 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Grammar Polisher
 
-## Getting Started
+A Vercel-deployed, **bring-your-own-key** (BYOK) Grammarly-style grammar/text polisher. Paste text → click **Polish** → see inline, per-span suggestions with reasons; accept/reject each or accept all.
 
-First, run the development server:
+Supported providers (you supply the API key): **DeepSeek**, **Kimi (Moonshot)**, **GLM (智谱)**, **Gemini**, and any **OpenAI-compatible** custom endpoint.
+
+## Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+npm run dev     # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open the app, click ⚙️, pick a provider, paste your API key, (optionally) tune the model. The key is stored in your browser only — check "记住 Key" to persist it to `localStorage`; otherwise it lives in memory for the session.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## How to verify
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Automated gate (run before commit):
 
-## Learn More
+```bash
+npm run lint && npm run typecheck && npm test && npm run build
+```
 
-To learn more about Next.js, take a look at the following resources:
+Manual smoke tests (need real API keys + `npm run dev`):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. **English** — configure DeepSeek/GLM/Gemini. Paste:
+   `She dont know what your doing, becouse the team have went home.`
+   Expect several highlights; accept one (text updates), **Accept all**, **Copy result**.
+2. **Chinese** — paste: `这个方案我觉得吧，可能会有一些潜在的风险存在，我们需要进一步的来进行讨论。`
+   Expect style/clarity/word-choice suggestions (中文润色 prompt focuses there).
+3. **Kimi proxy fallback** — configure a Kimi key, polish any text. In DevTools Network you should see a failed direct call to `api.moonshot.cn` (CORS-blocked) followed by a successful `/api/polish` call — the stateless proxy re-runs the polish server-side. Results render normally.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## Architecture
 
-## Deploy on Vercel
+- **Provider layer**: one `Provider` interface, two adapters (`openai-compatible`, `gemini`) + a preset registry. Adding an OpenAI-compatible provider = one config line.
+- **Matching engine** (`lib/providers/shared/match.ts`): pins each LLM correction to a span via exact `indexOf` → diff-match-patch fuzzy → drop (with a similarity guardrail — a wrong pin is worse than no pin).
+- **CORS self-heal**: all providers default to direct browser calls; on a network/CORS `TypeError`, automatically retry once through the stateless `/api/polish` route (key in body, nothing logged/cached).
+- **Full design**: [`docs/superpowers/specs/2026-07-15-grammar-polisher-design.md`](docs/superpowers/specs/2026-07-15-grammar-polisher-design.md)
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Tech
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Next.js 16 (App Router) · TypeScript (strict) · Vitest · zod · diff-match-patch
