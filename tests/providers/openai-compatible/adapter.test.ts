@@ -19,7 +19,7 @@ describe("openai-compatible adapter", () => {
     const body = JSON.parse((init as RequestInit).body as string);
     expect(body.response_format).toEqual({ type: "json_object" });
     expect(body.model).toBe("deepseek-v4-pro");
-    expect((init as RequestInit).headers.Authorization).toBe("Bearer k");
+    expect(((init as RequestInit).headers as Record<string, string>).Authorization).toBe("Bearer k");
   });
 
   it("returns parsed corrections", async () => {
