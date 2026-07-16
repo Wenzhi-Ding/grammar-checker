@@ -46,6 +46,8 @@ export function usePolish(update: UpdateTask) {
           body = await provider.polishStream(text, opts.config, onToken, ac.signal);
         } else {
           // Legacy non-stream path (proxy fallback here, as before).
+          // NOTE: abort is a no-op on this path (no signal threading) — harmless
+          // today since both builtin adapters implement polishStream.
           const direct = async () => {
             const b = await provider.polish(text, opts.config);
             return { ok: true as const, status: 200, body: b };
@@ -64,7 +66,8 @@ export function usePolish(update: UpdateTask) {
         update(taskId, { status: "error", error: toPolishError(err) });
         return null;
       } finally {
-        controllers.current.delete(taskId);
+        // Only delete OUR entry — a stale run must not remove a newer run's controller.
+        if (controllers.current.get(taskId) === ac) controllers.current.delete(taskId);
       }
     },
     [update],
