@@ -154,11 +154,15 @@ body {
 /* ---- settings dropdown ---- */
 .gp-settings {
   position: absolute; right: 0; top: 48px; z-index: 40; width: 320px;
+  max-height: calc(100vh - 96px); overflow-y: auto;
   background: #fff; border: 1px solid var(--gp-line); border-radius: 12px;
   box-shadow: var(--gp-shadow-pop); padding: 18px;
 }
-.gp-field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--gp-sub); margin-bottom: 6px; }
-.gp-field-label:not(:first-child) { margin-top: 16px; }
+.gp-settings-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; color: var(--gp-sub); margin: 0 0 6px; }
+.gp-settings-divider { height: 1px; background: var(--gp-line); margin: 14px 0; }
+.gp-key-row { margin-bottom: 12px; }
+.gp-field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--gp-sub); margin: 12px 0 4px; }
+.gp-key-row .gp-field-label { margin: 0 0 4px; }
 .gp-input, .gp-select {
   width: 100%; border: 1px solid var(--gp-line); border-radius: 8px; padding: 9px 10px;
   font-size: 14px; font-family: inherit; color: var(--gp-text); background: #fff;

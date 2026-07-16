@@ -1,19 +1,21 @@
 // components/SettingsPanel.tsx
 "use client";
 import { useState } from "react";
-import { ProviderSelect } from "./ProviderSelect";
-import { getPreset } from "@/lib/providers/shared/presets";
-import type { Settings } from "@/hooks/useSettings";
+import { PRESETS, type ProviderPreset } from "@/lib/providers/shared/presets";
+import type { Settings, ProviderId } from "@/hooks/useSettings";
 
 interface Props {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
 }
 
+const STANDARD = PRESETS.filter((p) => p.id !== "custom");
+
 export function SettingsPanel({ settings, update }: Props) {
   const [open, setOpen] = useState(false);
-  const preset = getPreset(settings.presetId);
-  const isCustom = settings.presetId === "custom";
+
+  const setKey = (id: ProviderId, value: string) =>
+    update({ keys: { ...settings.keys, [id]: value } });
 
   return (
     <div className="relative">
@@ -27,44 +29,53 @@ export function SettingsPanel({ settings, update }: Props) {
       </button>
       {open && (
         <div className="gp-settings">
-          <label className="gp-field-label">Provider</label>
-          <ProviderSelect value={settings.presetId} onChange={(id) => update({ presetId: id })} />
+          <div className="gp-settings-title">API Keys</div>
 
-          {isCustom && (
-            <>
-              <label className="gp-field-label">Base URL</label>
+          {STANDARD.map((p: ProviderPreset) => (
+            <div key={p.id} className="gp-key-row">
+              <label className="gp-field-label">{p.label}</label>
               <input
                 className="gp-input"
-                placeholder="https://..."
-                value={settings.baseURL}
-                onChange={(e) => update({ baseURL: e.target.value })}
+                type="password"
+                placeholder={p.keyUrl ? `从 ${p.keyUrl} 获取` : "粘贴 API Key"}
+                value={settings.keys[p.id]}
+                onChange={(e) => setKey(p.id, e.target.value)}
               />
-            </>
-          )}
+            </div>
+          ))}
 
-          <label className="gp-field-label">API Key</label>
-          <input
-            className="gp-input"
-            type="password"
-            placeholder={preset.keyUrl ? `从 ${preset.keyUrl} 获取` : "粘贴 API Key"}
-            value={settings.apiKey}
-            onChange={(e) => update({ apiKey: e.target.value })}
-          />
-          <label className="gp-checkbox-row">
+          <div className="gp-settings-divider" />
+          <div className="gp-settings-title">Custom endpoint</div>
+          <div className="gp-key-row">
+            <label className="gp-field-label">Base URL</label>
             <input
-              type="checkbox"
-              checked={settings.rememberKey}
-              onChange={(e) => update({ rememberKey: e.target.checked })}
+              className="gp-input"
+              placeholder="https://..."
+              value={settings.customBaseURL}
+              onChange={(e) => update({ customBaseURL: e.target.value })}
             />
-            记住 Key（存到本机 localStorage）
-          </label>
+          </div>
+          <div className="gp-key-row">
+            <label className="gp-field-label">Custom API Key</label>
+            <input
+              className="gp-input"
+              type="password"
+              placeholder="粘贴 API Key"
+              value={settings.keys.custom}
+              onChange={(e) => setKey("custom", e.target.value)}
+            />
+          </div>
+          <div className="gp-key-row">
+            <label className="gp-field-label">Custom Model</label>
+            <input
+              className="gp-input"
+              placeholder="model name"
+              value={settings.provider === "custom" ? settings.model : ""}
+              onChange={(e) => update({ provider: "custom", model: e.target.value })}
+            />
+          </div>
 
-          <label className="gp-field-label">Model</label>
-          <input
-            className="gp-input"
-            value={settings.model}
-            onChange={(e) => update({ model: e.target.value })}
-          />
+          <div className="gp-settings-divider" />
 
           <label className="gp-field-label">Language (text)</label>
           <select
@@ -87,6 +98,15 @@ export function SettingsPanel({ settings, update }: Props) {
             <option value="en">English</option>
             <option value="zh">中文</option>
           </select>
+
+          <label className="gp-checkbox-row">
+            <input
+              type="checkbox"
+              checked={settings.rememberKey}
+              onChange={(e) => update({ rememberKey: e.target.checked })}
+            />
+            记住 Keys（存到本机 localStorage）
+          </label>
         </div>
       )}
     </div>

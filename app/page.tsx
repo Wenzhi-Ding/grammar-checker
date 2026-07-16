@@ -1,6 +1,6 @@
 // app/page.tsx
 "use client";
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { Editor } from "@/components/Editor";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { SettingsPanel } from "@/components/SettingsPanel";
@@ -9,6 +9,7 @@ import { useSettings } from "@/hooks/useSettings";
 import { usePolish } from "@/hooks/usePolish";
 import { pinSpans } from "@/lib/providers/shared/match";
 import { applyAccept } from "@/lib/providers/shared/offsets";
+import { buildModelOptions, PROVIDER_MODELS, getPreset } from "@/lib/providers/shared/presets";
 import type { PinnedCorrection } from "@/lib/providers/shared/schema";
 
 export default function Home() {
@@ -32,6 +33,24 @@ export default function Home() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [result, status]);
 
+  // Resolve the effective provider+model: prefer the user's selection if it has a key
+  // and a valid model; otherwise fall back to the first available configured model.
+  const effective = useMemo(() => {
+    const options = buildModelOptions(settings.keys);
+    if (
+      settings.provider !== "custom" &&
+      settings.keys[settings.provider] &&
+      PROVIDER_MODELS[settings.provider].includes(settings.model)
+    ) {
+      return { provider: settings.provider, model: settings.model, options };
+    }
+    if (settings.provider === "custom" && settings.keys.custom && settings.model) {
+      return { provider: "custom" as const, model: settings.model, options };
+    }
+    if (options.length) return { provider: options[0].provider, model: options[0].model, options };
+    return { provider: settings.provider, model: settings.model, options };
+  }, [settings]);
+
   const onPolish = useCallback(async () => {
     setPolishedText(text);
     setSuggestions([]);
@@ -42,17 +61,20 @@ export default function Home() {
           ? "zh"
           : "en"
         : settings.reasonLanguage;
+    const apiKey = settings.keys[effective.provider];
+    const baseURL =
+      effective.provider === "custom" ? settings.customBaseURL : getPreset(effective.provider).baseURL;
     await polish(text, {
-      presetId: settings.presetId,
+      presetId: effective.provider,
       config: {
-        apiKey: settings.apiKey,
-        model: settings.model,
-        baseURL: settings.baseURL || undefined,
+        apiKey,
+        model: effective.model,
+        baseURL: baseURL || undefined,
         language: settings.language,
         reasonLanguage,
       },
     });
-  }, [text, settings, polish]);
+  }, [text, settings, effective, polish]);
 
   const handleAccept = useCallback(
     (id: string) => {
@@ -152,9 +174,10 @@ export default function Home() {
 
         <div className="gp-actionrow">
           <ModelSelect
-            presetId={settings.presetId}
-            model={settings.model}
-            onChange={(m) => update({ model: m })}
+            keys={settings.keys}
+            provider={effective.provider}
+            model={effective.model}
+            onChange={(p, m) => update({ provider: p, model: m })}
           />
           <div className="gp-actionrow-btns">
             {inReview && (
@@ -169,7 +192,7 @@ export default function Home() {
             <button
               className="gp-btn gp-btn-primary"
               onClick={onPolish}
-              disabled={busy || !settings.apiKey || !text}
+              disabled={busy || !settings.keys[effective.provider] || !text}
             >
               {busy ? "Polishing…" : "Polish"}
             </button>

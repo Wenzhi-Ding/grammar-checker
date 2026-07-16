@@ -1,38 +1,53 @@
 // components/ModelSelect.tsx
 "use client";
-import { type ProviderPreset } from "@/lib/providers/shared/presets";
-
-const SUGGESTED: Record<ProviderPreset["id"], string[]> = {
-  deepseek: ["deepseek-v4-pro", "deepseek-v4", "deepseek-reasoner"],
-  kimi: ["kimi-k2.7-code", "moonshot-v1-8k", "moonshot-v1-32k"],
-  glm: ["glm-5.2", "glm-4-flash", "glm-4"],
-  gemini: ["gemini-3.5-flash", "gemini-3.5-pro", "gemini-2.5-flash"],
-  custom: [],
-};
+import { useMemo } from "react";
+import { getPreset, buildModelOptions, type ModelOption, type ProviderPreset } from "@/lib/providers/shared/presets";
 
 interface Props {
-  presetId: ProviderPreset["id"];
+  keys: Record<ProviderPreset["id"], string>;
+  /** current provider + model (effective selection) */
+  provider: ProviderPreset["id"];
   model: string;
-  onChange: (model: string) => void;
+  onChange: (provider: ProviderPreset["id"], model: string) => void;
 }
 
-export function ModelSelect({ presetId, model, onChange }: Props) {
-  const listId = `gp-models-${presetId}`;
+export function ModelSelect({ keys, provider, model, onChange }: Props) {
+  const options = useMemo(() => buildModelOptions(keys), [keys]);
+
+  const groups = useMemo(() => {
+    const map = new Map<ProviderPreset["id"], string[]>();
+    for (const o of options) {
+      if (!map.has(o.provider)) map.set(o.provider, []);
+      map.get(o.provider)!.push(o.model);
+    }
+    return map;
+  }, [options]);
+
+  const currentValue = `${provider}::${model}`;
+
   return (
     <div className="gp-modelselect">
       <span className="gp-modelselect-label">Model</span>
-      <input
+      <select
         className="gp-modelselect-input"
-        list={listId}
-        value={model}
-        placeholder="model name"
-        onChange={(e) => onChange(e.target.value)}
-      />
-      <datalist id={listId}>
-        {SUGGESTED[presetId].map((m) => (
-          <option key={m} value={m} />
+        value={options.some((o: ModelOption) => `${o.provider}::${o.model}` === currentValue) ? currentValue : ""}
+        disabled={options.length === 0}
+        onChange={(e) => {
+          const [p, ...rest] = e.target.value.split("::");
+          onChange(p as ProviderPreset["id"], rest.join("::"));
+        }}
+      >
+        {options.length === 0 && <option value="">Configure a key in ⚙️</option>}
+        {[...groups.entries()].map(([p, models]) => (
+          <optgroup key={p} label={getPreset(p).label}>
+            {models.map((m) => (
+              <option key={m} value={`${p}::${m}`}>
+                {m}
+              </option>
+            ))}
+          </optgroup>
         ))}
-      </datalist>
+      </select>
     </div>
   );
 }
