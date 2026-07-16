@@ -40,7 +40,11 @@ export function reasonLanguageName(lang: "en" | "zh"): string {
   return lang === "zh" ? "Simplified Chinese (简体中文)" : "English";
 }
 
-export function assembleSystem(sharedFraming: string, reasonLanguage?: "en" | "zh"): string {
+export function assembleSystem(
+  sharedFraming: string,
+  reasonLanguage?: "en" | "zh",
+  customInstructions?: string,
+): string {
   const parts = [sharedFraming, COVERAGE_RULE, FORMATTING_RULE, SCHEMA_DESCRIPTION, VERBATIM_RULE];
   if (reasonLanguage) {
     // Decouple explanation language from the input text's language:
@@ -48,6 +52,11 @@ export function assembleSystem(sharedFraming: string, reasonLanguage?: "en" | "z
     parts.push(
       `Write every "reason" field in ${reasonLanguageName(reasonLanguage)}, regardless of the input text's language. The corrections themselves must still match the input text's language.`,
     );
+  }
+  const extra = customInstructions?.trim();
+  if (extra) {
+    // Appended LAST, after all hard rules (schema/verbatim are contractual and always stay).
+    parts.push(`ADDITIONAL INSTRUCTIONS FROM THE USER:\n${extra}`);
   }
   return parts.join("\n\n");
 }
