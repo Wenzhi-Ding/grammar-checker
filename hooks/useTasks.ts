@@ -9,6 +9,14 @@ function isTokenOnlyPatch(patch: Partial<PolishTask>): boolean {
   return Object.keys(patch).every((k) => k === "approxTokens");
 }
 
+/**
+ * Task list state + localStorage persistence.
+ * NOTE: saveTasks is invoked inside setState updaters, which React may
+ * double-invoke (StrictMode) or invoke-then-discard (concurrent). This is
+ * safe ONLY because saveTasks is idempotent — if persistence ever gains
+ * non-idempotent behavior (revision counters, cross-tab sync), move
+ * persistence out of the updaters first.
+ */
 export function useTasks() {
   const [tasks, setTasks] = useState<PolishTask[]>([]);
 

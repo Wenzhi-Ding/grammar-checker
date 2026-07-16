@@ -94,4 +94,24 @@ describe("useTasks", () => {
     expect(result.current.tasks).toHaveLength(0);
     expect(JSON.parse(window.localStorage.getItem(TASKS_STORAGE_KEY) ?? "[]")).toHaveLength(0);
   });
+
+  it("rewrites storage with the rehydrated list on mount", () => {
+    window.localStorage.setItem(TASKS_STORAGE_KEY, JSON.stringify([storedTask("a", { status: "running" })]));
+    renderHook(() => useTasks());
+    const persisted = JSON.parse(window.localStorage.getItem(TASKS_STORAGE_KEY) ?? "[]") as PolishTask[];
+    expect(persisted[0]?.status).toBe("interrupted");
+  });
+
+  it("persists mixed patches (approxTokens + status)", () => {
+    const { result } = renderHook(() => useTasks());
+    let id = "";
+    act(() => {
+      id = result.current.enqueue("hello", { providerId: "deepseek", model: "m" });
+    });
+    const spy = vi.spyOn(Storage.prototype, "setItem");
+    act(() => {
+      result.current.update(id, { approxTokens: 12, status: "done", result: { corrections: [] } });
+    });
+    expect(spy).toHaveBeenCalled();
+  });
 });
