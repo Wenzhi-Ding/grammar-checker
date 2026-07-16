@@ -4,6 +4,7 @@ export type CorrectionType =
   | "grammar"
   | "spelling"
   | "punctuation"
+  | "formatting"
   | "style"
   | "clarity"
   | "word-choice";

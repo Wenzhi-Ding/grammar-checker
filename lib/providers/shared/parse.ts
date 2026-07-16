@@ -5,7 +5,7 @@ import type { PolishResult } from "./schema";
 const CorrectionSchema = z.object({
   original: z.string().min(1),
   suggestion: z.string(),
-  type: z.enum(["grammar", "spelling", "punctuation", "style", "clarity", "word-choice"]),
+  type: z.enum(["grammar", "spelling", "punctuation", "formatting", "style", "clarity", "word-choice"]),
   reason: z.string(),
   severity: z.enum(["info", "minor", "major"]).optional(),
 });

@@ -18,7 +18,7 @@ export interface ProviderEntry {
 }
 
 export const BUILTIN_PROVIDERS: ProviderEntry[] = [
-  { id: "deepseek", label: "DeepSeek", adapter: "openai-compatible", baseURL: "https://api.deepseek.com/v1", apiKey: "", models: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-reasoner"], keyUrl: "https://platform.deepseek.com", builtin: true },
+  { id: "deepseek", label: "DeepSeek", adapter: "openai-compatible", baseURL: "https://api.deepseek.com/v1", apiKey: "", models: ["deepseek-v4-pro", "deepseek-v4-flash"], keyUrl: "https://platform.deepseek.com", builtin: true },
   { id: "kimi", label: "Kimi (Moonshot)", adapter: "openai-compatible", baseURL: "https://api.moonshot.cn/v1", apiKey: "", models: ["kimi-k2.6", "kimi-k2.7"], keyUrl: "https://platform.moonshot.cn", builtin: true },
   { id: "glm", label: "GLM (智谱)", adapter: "openai-compatible", baseURL: "https://open.bigmodel.cn/api/paas/v4", apiKey: "", models: ["glm-5.2", "glm-4-flash", "glm-4-air"], keyUrl: "https://open.bigmodel.cn", builtin: true },
   { id: "gemini", label: "Gemini", adapter: "gemini", baseURL: "", apiKey: "", models: ["gemini-3.5-flash", "gemini-3.5-pro", "gemini-2.5-flash"], keyUrl: "https://ai.google.dev", builtin: true },

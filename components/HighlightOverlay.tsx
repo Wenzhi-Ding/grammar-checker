@@ -14,6 +14,7 @@ const TYPE_CLASS: Record<CorrectionType, string> = {
   grammar: "gp-hl-grammar",
   spelling: "gp-hl-grammar",
   punctuation: "gp-hl-grammar",
+  formatting: "gp-hl-formatting",
   style: "gp-hl-style",
   "word-choice": "gp-hl-style",
   clarity: "gp-hl-clarity",

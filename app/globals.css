@@ -101,6 +101,7 @@ body {
 .gp-hl-grammar { text-decoration: underline wavy var(--gp-red); text-underline-offset: 4px; text-decoration-thickness: 2px; }
 .gp-hl-style { text-decoration: underline wavy var(--gp-blue); text-underline-offset: 4px; text-decoration-thickness: 2px; }
 .gp-hl-clarity { text-decoration: underline wavy var(--gp-purple); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.gp-hl-formatting { text-decoration: underline wavy #00897b; text-underline-offset: 4px; text-decoration-thickness: 2px; }
 .gp-hl-major { text-decoration-thickness: 3px; }
 .gp-hl-active { background: var(--gp-yellow-bg); border-radius: 3px; }
 
