@@ -111,6 +111,9 @@ export default function Home() {
 
   const handlePickTask = useCallback(
     (id: string) => {
+      // Re-clicking the already-focused task is a no-op — reloading its snapshot
+      // would wipe suggestions the user already accepted (accepts keep focus).
+      if (id === focusedRef.current) return;
       const t = tasks.find((x) => x.id === id);
       if (!t) return;
       setFocusedTaskId(id);
