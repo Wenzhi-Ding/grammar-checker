@@ -18,6 +18,9 @@ A Vercel-deployed web app (Grammarly-style) for grammar correction and text poli
 
 - **User API key lives in the browser only.** Store in memory or `localStorage`. Never persist server-side, never log it, never put it in a URL, never commit it.
 - **Core UX loop**: original text → LLM returns *structured* corrections → frontend pins each to a span and renders Grammarly-style inline highlights. The LLM output must be structured, not free prose.
+- **Task queue**: every polish is a `PolishTask` (see `lib/tasks/`), run in parallel,
+  persisted to localStorage (cap 50, newest first). The editor shows the *focused*
+  task; background completions land as "unread". Spec: `docs/superpowers/specs/2026-07-16-task-queue-streaming-design.md`.
 - **Structured output schema is the central contract** (single source of truth shared by all providers):
 
   ```ts
@@ -42,6 +45,9 @@ CORS is an empirical per-provider property, so **don't hardcode "direct vs proxy
 
 1. **All providers default to direct browser calls** (key in `Authorization` header). Key visible in the user's own network tab is acceptable — their key, their machine.
 2. **Auto-fallback**: the provider layer wraps each call — on a CORS/network `TypeError` (opaque failure, distinct from an HTTP status), automatically retry once through the stateless `app/api/polish/route.ts`. To keep the key out of Vercel logs, the proxy takes the key in the **request body** (not header), then relays it as `Authorization`. The route stores/logs/caches **nothing**.
+   Streaming uses the same route as an SSE passthrough (`stream: true` in the
+   body): the route relays upstream bytes untouched — nothing parsed, stored,
+   or logged.
 3. This self-heals: Kimi falls back to proxy transparently; Custom endpoints work regardless of their CORS; if a provider's policy changes, no code change is needed.
 
 ## Dev commands (after `create-next-app` scaffold)
@@ -88,5 +94,4 @@ your own diff against a red baseline you didn't create.
 
 ## Open decisions (resolve as the project grows)
 
-- Streaming vs full response (v1: full response; streaming + incremental diff is a later enhancement).
 - Long-document chunking (v1: short text only; the `Provider` interface reserves a `polishChunk` hook).
