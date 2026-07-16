@@ -268,11 +268,11 @@ body {
 @media (max-width: 899px) {
   .gp-tasks-toggle { display: flex; }
   .gp-tasks-wrap {
-    position: fixed; left: 0; top: 64px; bottom: 0; z-index: 45; width: 300px;
+    position: fixed; left: 0; top: 64px; bottom: 0; z-index: 55; width: 300px;
     transform: translateX(-100%); transition: transform 0.2s; background: var(--gp-bg);
   }
   .gp-tasks-wrap.open { transform: translateX(0); box-shadow: var(--gp-shadow-pop); }
   .gp-tasks { border-radius: 0; height: 100%; }
-  .gp-tasks-backdrop { display: block; position: fixed; inset: 64px 0 0 0; z-index: 44; background: rgba(0, 0, 0, 0.3); }
+  .gp-tasks-backdrop { display: block; position: fixed; inset: 64px 0 0 0; z-index: 54; background: rgba(0, 0, 0, 0.3); }
   .gp-layout { gap: 0; }
 }
