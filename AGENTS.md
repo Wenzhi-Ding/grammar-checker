@@ -55,6 +55,13 @@ npm run typecheck  # if not present, add: tsc --noEmit
 
 Required pre-commit order: **lint → typecheck → build**.
 
+## Baseline check at session start
+
+Before starting work, run `npm run typecheck` once. If it fails on files you haven't
+touched, the breakage is inherited from a previous commit — fix the root cause first
+(e.g. missing dependency), commit it separately, then start your task. Don't debug
+your own diff against a red baseline you didn't create.
+
 ## Conventions
 
 - TypeScript strict mode. No `any` in provider/shared code; infer or define types.
