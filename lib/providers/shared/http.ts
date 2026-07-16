@@ -39,3 +39,35 @@ export async function callWithFallback<T = unknown>(
     return { ok: true, status: res.status, body };
   }
 }
+
+/**
+ * Streaming variant of callWithFallback. `direct()` returns the raw SSE
+ * Response as-is (ok or not — the caller inspects it). Only a TypeError
+ * (browser CORS/network opaque failure, thrown BEFORE any stream bytes are
+ * consumed) triggers one proxy retry via /api/polish with `stream: true`
+ * added to the body. Mid-stream failures must NOT be retried here.
+ */
+export async function callStreamWithFallback(
+  direct: () => Promise<Response>,
+  opts: { proxyBody: ProxyBody },
+  proxyFetch?: (url: string, init: RequestInit) => Promise<Response>,
+): Promise<Response> {
+  try {
+    return await direct();
+  } catch (err) {
+    if (!(err instanceof TypeError)) throw err;
+    const fetcher = proxyFetch ?? globalThis.fetch;
+    const res = await fetcher("/api/polish", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...opts.proxyBody, stream: true }),
+    });
+    if (!res.ok) {
+      const body = (await res.json().catch(() => ({}))) as { error?: string };
+      const err2 = new Error(body.error ?? `proxy returned ${res.status}`) as Error & { status: number };
+      err2.status = res.status;
+      throw err2;
+    }
+    return res;
+  }
+}
