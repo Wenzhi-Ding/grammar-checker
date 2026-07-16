@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { newCustomProvider, type ProviderEntry, type AdapterKind } from "@/lib/providers/shared/presets";
 import { SettingsIcon } from "@/components/Icons";
+import { useLocale } from "@/hooks/useLocale";
 import type { Settings } from "@/hooks/useSettings";
 
 interface Props {
@@ -13,6 +14,7 @@ interface Props {
 export function SettingsPanel({ settings, update }: Props) {
   const [open, setOpen] = useState(false);
   const [editId, setEditId] = useState<string>(settings.selectedProviderId);
+  const locale = useLocale();
 
   const editing = settings.providers.find((p) => p.id === editId) ?? settings.providers[0];
 
@@ -101,6 +103,11 @@ export function SettingsPanel({ settings, update }: Props) {
             placeholder={editing?.keyUrl ? `从 ${editing.keyUrl} 获取` : "粘贴 API Key"}
             onChange={(e) => patchProvider(editing.id, { apiKey: e.target.value })}
           />
+          <p className="gp-key-note">
+            {locale === "zh"
+              ? "Key 与文本仅存于浏览器，绝不上传。"
+              : "Your key & text never leave the browser."}
+          </p>
 
           <label className="gp-field-label">Models (one per line)</label>
           <textarea

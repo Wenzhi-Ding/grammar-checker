@@ -197,3 +197,23 @@ body {
 .gp-btn-mini:hover { background: var(--gp-blue-soft); }
 .gp-btn-mini.gp-btn-danger { color: var(--gp-red-text); }
 .gp-models-area { min-height: 72px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.5; white-space: pre; }
+
+/* ---- privacy / open-source notices ---- */
+.gp-footer {
+  max-width: 760px; margin: 0 auto 56px; padding: 0 20px;
+  text-align: center; color: var(--gp-sub); font-size: 13px; line-height: 1.7;
+}
+.gp-footer-line { margin: 0; }
+.gp-footer-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 6px; color: var(--gp-sub); text-decoration: none; font-size: 13px;
+}
+.gp-footer-link:hover { color: var(--gp-blue); }
+/* Tailwind preflight sets `svg { display: block }`; force inline so the icon
+   can never land on its own line regardless of the parent's flex state. */
+.gp-footer-link svg { display: inline-block; flex: none; vertical-align: middle; }
+
+/* compact privacy note under the API Key field in settings */
+.gp-key-note {
+  margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--gp-sub);
+}

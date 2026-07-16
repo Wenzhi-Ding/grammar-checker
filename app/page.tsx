@@ -5,9 +5,10 @@ import { Editor } from "@/components/Editor";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ModelSelect } from "@/components/ModelSelect";
-import { CopyIcon } from "@/components/Icons";
+import { CopyIcon, GitHubIcon } from "@/components/Icons";
 import { useSettings } from "@/hooks/useSettings";
 import { usePolish } from "@/hooks/usePolish";
+import { useLocale } from "@/hooks/useLocale";
 import { pinSpans } from "@/lib/providers/shared/match";
 import { applyAccept } from "@/lib/providers/shared/offsets";
 import { buildModelOptions, type ProviderEntry } from "@/lib/providers/shared/presets";
@@ -32,6 +33,7 @@ export default function Home() {
   const MAX_CHARS = 50000;
   const { settings, update } = useSettings();
   const { status, result, error, polish, reset } = usePolish();
+  const locale = useLocale();
 
   const [text, setText] = useState("");
   const [polishedText, setPolishedText] = useState("");
@@ -296,6 +298,23 @@ export default function Home() {
           </details>
         )}
       </main>
+
+      <footer className="gp-footer">
+        <p className="gp-footer-line">
+          {locale === "zh"
+            ? "完全开源 · 纯前端运行 · API Key 与文本不会上传到任何服务器"
+            : "100% open source · runs entirely in your browser · your API key and text never leave your device."}
+        </p>
+        <a
+          className="gp-footer-link"
+          href="https://github.com/Wenzhi-Ding/grammar-checker"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          <GitHubIcon size={16} />
+          <span>github.com/Wenzhi-Ding/grammar-checker</span>
+        </a>
+      </footer>
     </>
   );
 }
