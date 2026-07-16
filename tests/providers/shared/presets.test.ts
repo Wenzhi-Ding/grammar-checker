@@ -10,7 +10,7 @@ import {
 
 describe("providers", () => {
   it("seeds the built-in providers with empty keys", () => {
-    expect(BUILTIN_PROVIDERS.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "glm-zai", "kimi", "kimi-code"]);
+    expect(BUILTIN_PROVIDERS.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi"]);
     expect(BUILTIN_PROVIDERS.every((p) => p.builtin && p.apiKey === "")).toBe(true);
   });
 
@@ -46,6 +46,6 @@ describe("providers", () => {
     expect(merged.find((p) => p.id === "deepseek")?.apiKey).toBe("kept");
     expect(merged.find((p) => p.id === "deepseek")?.baseURL).toBe("https://edited");
     // missing built-ins filled in
-    expect(merged.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "glm-zai", "kimi", "kimi-code"]);
+    expect(merged.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi"]);
   });
 });
