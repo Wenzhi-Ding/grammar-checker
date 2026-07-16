@@ -13,8 +13,9 @@ export interface Settings {
   reasonLanguage: "en" | "zh" | "auto";
 }
 
-const STORAGE_KEY = "grammar-polisher.settings.v4";
+const STORAGE_KEY = "grammar-polisher.settings.v5";
 const LEGACY_KEYS = [
+  "grammar-polisher.settings.v4",
   "grammar-polisher.settings.v3",
   "grammar-polisher.settings.v3.nosecret",
   "grammar-polisher.settings.v2",
