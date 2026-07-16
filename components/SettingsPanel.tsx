@@ -2,6 +2,7 @@
 "use client";
 import { useState } from "react";
 import { newCustomProvider, type ProviderEntry, type AdapterKind } from "@/lib/providers/shared/presets";
+import { SettingsIcon } from "@/components/Icons";
 import type { Settings } from "@/hooks/useSettings";
 
 interface Props {
@@ -38,7 +39,7 @@ export function SettingsPanel({ settings, update }: Props) {
         aria-label="Settings"
         title="Settings"
       >
-        ⚙️
+        <SettingsIcon />
       </button>
       {open && (
         <div className="gp-settings">

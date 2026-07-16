@@ -1,4 +1,4 @@
-# Grammar Polisher — 设计文档
+# Grammar Checker — 设计文档
 
 - **日期**: 2026-07-15
 - **状态**: 已通过 brainstorming 审定，待实现

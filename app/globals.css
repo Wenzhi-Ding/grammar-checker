@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ===== Grammar Polisher — Google Translate visual language ===== */
+/* ===== Grammar Checker — Google Translate visual language ===== */
 :root {
   --gp-blue: #1a73f8;
   --gp-blue-h: #1765cc;
@@ -104,6 +104,7 @@ body {
   padding: 6px 12px; border-top: 1px solid var(--gp-line); background: #fbfcfe;
 }
 .gp-count { font-size: 13px; color: var(--gp-sub); }
+.gp-count-over { color: var(--gp-red-text); }
 .gp-acts { display: flex; gap: 2px; }
 
 /* ---- grammarly-style wavy underlines ---- */

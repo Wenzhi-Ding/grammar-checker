@@ -5,6 +5,7 @@ import { Editor } from "@/components/Editor";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ModelSelect } from "@/components/ModelSelect";
+import { CopyIcon } from "@/components/Icons";
 import { useSettings } from "@/hooks/useSettings";
 import { usePolish } from "@/hooks/usePolish";
 import { pinSpans } from "@/lib/providers/shared/match";
@@ -12,7 +13,23 @@ import { applyAccept } from "@/lib/providers/shared/offsets";
 import { buildModelOptions, type ProviderEntry } from "@/lib/providers/shared/presets";
 import type { PinnedCorrection } from "@/lib/providers/shared/schema";
 
+function findNextSuggestionId(
+  suggestions: PinnedCorrection[],
+  currentId: string,
+): string | null {
+  const current = suggestions.find((s) => s.id === currentId);
+  if (!current || current.start < 0) return null;
+  const pending = suggestions.filter((s) => s.state === "pending" && s.start >= 0);
+  const after = pending
+    .filter((s) => s.start > current.start)
+    .sort((a, b) => a.start - b.start)[0];
+  if (after) return after.id;
+  const first = pending.sort((a, b) => a.start - b.start)[0];
+  return first?.id ?? null;
+}
+
 export default function Home() {
+  const MAX_CHARS = 50000;
   const { settings, update } = useSettings();
   const { status, result, error, polish, reset } = usePolish();
 
@@ -77,16 +94,19 @@ export default function Home() {
       setSuggestions((prev) => {
         const { text: newText, suggestions: newSugs } = applyAccept(text, prev, id);
         setText(newText);
+        setActiveId(findNextSuggestionId(newSugs, id));
         return newSugs;
       });
-      setActiveId(null);
     },
     [text],
   );
 
   const handleReject = useCallback((id: string) => {
-    setSuggestions((prev) => prev.map((s) => (s.id === id ? { ...s, state: "rejected" as const } : s)));
-    setActiveId(null);
+    setSuggestions((prev) => {
+      const newSugs = prev.map((s) => (s.id === id ? { ...s, state: "rejected" as const } : s));
+      setActiveId(findNextSuggestionId(newSugs, id));
+      return newSugs;
+    });
   }, []);
 
   const handleAcceptAll = useCallback(() => {
@@ -140,11 +160,31 @@ export default function Home() {
   const inReview = status === "done";
   const busy = status === "loading";
 
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        setCardHeight(entry.contentRect.height);
+      }
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [active]);
+
+  useEffect(() => {
+    if (!activeId) return;
+    const mark = document.querySelector<HTMLElement>(`[data-id="${activeId}"]`);
+    if (mark) {
+      mark.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [activeId]);
+
   return (
     <>
       <header className="gp-topbar">
         <div className="gp-logo">
-          <span className="dot">Aa</span> Grammar Polisher
+          <span className="dot">Aa</span> Grammar Checker
         </div>
         <div className="gp-spacer" />
         <SettingsPanel settings={settings} update={update} />
@@ -152,7 +192,7 @@ export default function Home() {
 
       <main
         className={active ? "gp-wrap card-active" : "gp-wrap"}
-        style={active ? { "--gp-card-height": `${cardHeight}px` } : undefined}
+        style={active ? ({ "--gp-card-height": `${cardHeight}px` } as React.CSSProperties) : undefined}
       >
         <div className="gp-card">
           <Editor
@@ -162,9 +202,10 @@ export default function Home() {
             readOnly={busy}
             activeId={activeId}
             onPick={setActiveId}
+            maxLength={MAX_CHARS}
           />
           <div className="gp-toolbar">
-            <span className="gp-count">{text.length} / 5,000</span>
+            <span className={text.length > MAX_CHARS ? "gp-count gp-count-over" : "gp-count"}>{text.length} / 50,000</span>
             <div className="gp-acts">
               <button
                 className="gp-icon-btn"
@@ -172,7 +213,7 @@ export default function Home() {
                 disabled={!text}
                 onClick={copyResult}
               >
-                {copied ? "✓" : "📋"}
+                {copied ? "✓" : <CopyIcon />}
               </button>
               <button
                 className="gp-icon-btn"
@@ -206,7 +247,7 @@ export default function Home() {
             <button
               className="gp-btn gp-btn-primary"
               onClick={onPolish}
-              disabled={busy || !effective.provider.apiKey || !text}
+              disabled={busy || !effective.provider.apiKey || !text || text.length > MAX_CHARS}
             >
               {busy ? "Polishing…" : "Polish"}
             </button>

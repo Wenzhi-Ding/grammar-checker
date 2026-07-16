@@ -1,6 +1,6 @@
-# Grammar Polisher
+# Grammar Checker
 
-A Vercel-deployed, **bring-your-own-key** (BYOK) Grammarly-style grammar/text polisher. Paste text → click **Polish** → see inline, per-span suggestions with reasons; accept/reject each or accept all.
+A Vercel-deployed, **bring-your-own-key** (BYOK) Grammarly-style grammar/text checker. Paste text → click **Polish** → see inline, per-span suggestions with reasons; accept/reject each or accept all.
 
 Supported providers (you supply the API key): **DeepSeek**, **Kimi (Moonshot)**, **GLM (智谱)**, **Gemini**, and any **OpenAI-compatible** custom endpoint.
 
@@ -11,7 +11,7 @@ npm install
 npm run dev     # http://localhost:3000
 ```
 
-Open the app, click ⚙️, pick a provider, paste your API key, (optionally) tune the model. The key is stored in your browser only — check "记住 Key" to persist it to `localStorage`; otherwise it lives in memory for the session.
+Open the app, click ⚙️, pick a provider, paste your API key, (optionally) tune the model. The key is stored in your browser only — check "Remember key" to persist it to `localStorage`; otherwise it lives in memory for the session.
 
 ## How to verify
 

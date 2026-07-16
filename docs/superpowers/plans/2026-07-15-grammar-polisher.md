@@ -1,4 +1,4 @@
-# Grammar Polisher Implementation Plan
+# Grammar Checker Implementation Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
@@ -2178,7 +2178,7 @@ export default function Home() {
   return (
     <main className="mx-auto flex min-h-screen max-w-3xl flex-col gap-4 p-6">
       <header className="flex items-center justify-between">
-        <h1 className="text-xl font-bold">Grammar Polisher</h1>
+        <h1 className="text-xl font-bold">Grammar Checker</h1>
         <div className="flex items-center gap-3">
           <span className="text-sm text-gray-500">{settings.presetId}</span>
           <SettingsPanel settings={settings} update={update} />

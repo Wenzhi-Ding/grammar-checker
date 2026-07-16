@@ -11,9 +11,10 @@ interface EditorProps {
   readOnly: boolean;
   activeId: string | null;
   onPick: (id: string | null) => void;
+  maxLength?: number;
 }
 
-export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick }: EditorProps) {
+export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick, maxLength }: EditorProps) {
   const taRef = useRef<HTMLTextAreaElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -61,6 +62,7 @@ export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick
         value={text}
         readOnly={readOnly}
         spellCheck={false}
+        maxLength={maxLength}
         placeholder="Paste or type your text here…"
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
       />

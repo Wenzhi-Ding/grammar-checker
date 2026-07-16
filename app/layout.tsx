@@ -9,7 +9,7 @@ const roboto = Roboto({
 });
 
 export const metadata: Metadata = {
-  title: "Grammar Polisher",
+  title: "Grammar Checker",
   description: "BYOK grammar correction & text polishing — paste, polish, accept suggestions inline.",
 };
 
