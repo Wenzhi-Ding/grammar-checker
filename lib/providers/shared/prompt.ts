@@ -21,8 +21,20 @@ export const SCHEMA_DESCRIPTION = `Return ONLY a JSON object of this exact shape
 }
 If there is nothing to correct, return {"corrections": []}.`;
 
-export function assembleSystem(sharedFraming: string): string {
-  return [sharedFraming, SCHEMA_DESCRIPTION, VERBATIM_RULE].join("\n\n");
+export function reasonLanguageName(lang: "en" | "zh"): string {
+  return lang === "zh" ? "Simplified Chinese (简体中文)" : "English";
+}
+
+export function assembleSystem(sharedFraming: string, reasonLanguage?: "en" | "zh"): string {
+  const parts = [sharedFraming, SCHEMA_DESCRIPTION, VERBATIM_RULE];
+  if (reasonLanguage) {
+    // Decouple explanation language from the input text's language:
+    // correct the text in its own language, but write reasons in the user's chosen language.
+    parts.push(
+      `Write every "reason" field in ${reasonLanguageName(reasonLanguage)}, regardless of the input text's language. The corrections themselves must still match the input text's language.`,
+    );
+  }
+  return parts.join("\n\n");
 }
 
 export function assembleUser(text: string): string {

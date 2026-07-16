@@ -37,6 +37,8 @@ export interface ProviderConfig {
   model: string;
   baseURL?: string;
   language?: "en" | "zh" | "auto";
+  /** Language the LLM writes the `reason` field in (independent of the input text's language). */
+  reasonLanguage?: "en" | "zh";
 }
 
 export interface Provider {

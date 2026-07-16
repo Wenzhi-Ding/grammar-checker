@@ -66,13 +66,24 @@ export function SettingsPanel({ settings, update }: Props) {
             onChange={(e) => update({ model: e.target.value })}
           />
 
-          <label className="gp-field-label">Language</label>
+          <label className="gp-field-label">Language (text)</label>
           <select
             className="gp-select"
             value={settings.language}
             onChange={(e) => update({ language: e.target.value as Settings["language"] })}
           >
             <option value="auto">Auto</option>
+            <option value="en">English</option>
+            <option value="zh">中文</option>
+          </select>
+
+          <label className="gp-field-label">Reason language</label>
+          <select
+            className="gp-select"
+            value={settings.reasonLanguage}
+            onChange={(e) => update({ reasonLanguage: e.target.value as Settings["reasonLanguage"] })}
+          >
+            <option value="auto">Auto (browser)</option>
             <option value="en">English</option>
             <option value="zh">中文</option>
           </select>

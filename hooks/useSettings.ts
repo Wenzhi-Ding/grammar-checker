@@ -9,6 +9,8 @@ export interface Settings {
   model: string;
   baseURL: string;
   language: "en" | "zh" | "auto";
+  /** Language the LLM writes `reason` in. "auto" = browser language. */
+  reasonLanguage: "en" | "zh" | "auto";
   rememberKey: boolean;
 }
 
@@ -21,6 +23,7 @@ const DEFAULTS: Settings = {
   model: "deepseek-v4-pro",
   baseURL: "https://api.deepseek.com/v1",
   language: "auto",
+  reasonLanguage: "auto",
   rememberKey: false,
 };
 

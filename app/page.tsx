@@ -8,7 +8,6 @@ import { useSettings } from "@/hooks/useSettings";
 import { usePolish } from "@/hooks/usePolish";
 import { pinSpans } from "@/lib/providers/shared/match";
 import { applyAccept } from "@/lib/providers/shared/offsets";
-import { detect } from "@/lib/providers/shared/lang";
 import type { PinnedCorrection } from "@/lib/providers/shared/schema";
 
 export default function Home() {
@@ -34,6 +33,12 @@ export default function Home() {
 
   const onPolish = useCallback(async () => {
     setPolishedText(text);
+    const reasonLanguage: "en" | "zh" =
+      settings.reasonLanguage === "auto"
+        ? typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("zh")
+          ? "zh"
+          : "en"
+        : settings.reasonLanguage;
     await polish(text, {
       presetId: settings.presetId,
       config: {
@@ -41,6 +46,7 @@ export default function Home() {
         model: settings.model,
         baseURL: settings.baseURL || undefined,
         language: settings.language,
+        reasonLanguage,
       },
     });
   }, [text, settings, polish]);
@@ -97,7 +103,6 @@ export default function Home() {
   const active = suggestions.find((s) => s.id === activeId) ?? null;
   const inReview = status === "done";
   const busy = status === "loading";
-  const langLabel = text ? (detect(text) === "zh" ? "中文" : "English") : "—";
 
   return (
     <>
@@ -110,18 +115,6 @@ export default function Home() {
       </header>
 
       <main className="gp-wrap">
-        <div className="gp-segbar">
-          <div className="gp-seg">
-            <span className="lang">{langLabel}</span>
-            <span className="hint">detected</span>
-          </div>
-          <div className="gp-swap" title="polish in place">⇄</div>
-          <div className="gp-seg">
-            <span className="lang">Polished</span>
-            <span className="hint">inline suggestions</span>
-          </div>
-        </div>
-
         <div className="gp-card">
           <Editor
             text={text}

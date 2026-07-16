@@ -17,22 +17,38 @@ export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick
   const taRef = useRef<HTMLTextAreaElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
-  // Sync scroll between textarea and overlay.
+  // Bidirectional scroll sync (textarea <-> overlay).
+  // In review mode the overlay is the interactive layer (scrollable + marks clickable);
+  // in edit mode the textarea is. Either way, keep them aligned.
   useEffect(() => {
     const ta = taRef.current;
     const ov = overlayRef.current;
     if (!ta || !ov) return;
-    const onScroll = () => {
-      ov.scrollTop = ta.scrollTop;
-      ov.scrollLeft = ta.scrollLeft;
+    let syncing = false;
+    const sync = (from: HTMLElement, to: HTMLElement) => {
+      if (syncing || from.scrollTop === to.scrollTop) return;
+      syncing = true;
+      to.scrollTop = from.scrollTop;
+      syncing = false;
     };
-    ta.addEventListener("scroll", onScroll, { passive: true });
-    return () => ta.removeEventListener("scroll", onScroll);
+    const onTa = () => sync(ta, ov);
+    const onOv = () => sync(ov, ta);
+    ta.addEventListener("scroll", onTa, { passive: true });
+    ov.addEventListener("scroll", onOv, { passive: true });
+    return () => {
+      ta.removeEventListener("scroll", onTa);
+      ov.removeEventListener("scroll", onOv);
+    };
   }, []);
 
   return (
     <div className="gp-editor-wrap">
-      <div ref={overlayRef} className="gp-overlay" aria-hidden>
+      <div
+        ref={overlayRef}
+        className="gp-overlay"
+        style={{ pointerEvents: readOnly ? "auto" : "none" }}
+        aria-hidden
+      >
         <HighlightOverlay text={text} suggestions={suggestions} activeId={activeId} onPick={onPick} />
       </div>
       <textarea
