@@ -24,7 +24,7 @@ A Vercel-deployed web app (Grammarly-style) for grammar correction and text poli
   type Correction = {
     original: string;      // VERBATIM substring of the input (prompt enforces this)
     suggestion: string;    // replacement (empty = deletion)
-    type: "grammar" | "spelling" | "punctuation" | "style" | "clarity" | "word-choice";
+    type: "grammar" | "spelling" | "punctuation" | "formatting" | "style" | "clarity" | "word-choice";
     reason: string;        // one-line explanation for the user
     severity?: "info" | "minor" | "major";
   };
@@ -33,10 +33,8 @@ A Vercel-deployed web app (Grammarly-style) for grammar correction and text poli
 
   `original` MUST be a verbatim copy. The frontend pins each correction via a three-tier matcher in `lib/providers/shared/match.ts`: exact `indexOf` (sequential cursor) → diff-match-patch `match_main` fuzzy fallback → drop with `console.warn`. See spec §7.
 
-- **Provider layer is an adapter, not a switch in components.** A single `Provider` interface (`polish(text, config): Promise<PolishResult>`) implemented by only **two adapters**:
-  - `openai-compatible` — JSON mode (`response_format:{type:"json_object"}`) + prompt-embedded schema. Backs **DeepSeek** (`api.deepseek.com/v1`, `deepseek-v4-pro`), **Kimi/Moonshot** (`api.moonshot.cn/v1`, `kimi-k2.7-code`), **GLM/智谱** (`open.bigmodel.cn/api/paas/v4`, `glm-5.2`), and **Custom** (user-supplied baseURL).
-  - `gemini` — `responseSchema` + `responseMimeType:"application/json"`. Backs **Gemini** (`gemini-3.5-flash`).
-  - A **provider registry (presets)** maps friendly names → adapter + baseURL + default model. Adding a new OpenAI-compatible provider = one preset entry, no code. **OpenAI and Anthropic are deliberately not supported.**
+- **Provider layer is an adapter, not a switch in components.** A single `Provider` interface (`polish(text, config): Promise<PolishResult>`) resolved via `getProviderFor({id, adapter})` to one of two adapters: `openai-compatible` (JSON mode `{response_format:{type:"json_object"}}` + prompt-embedded schema) or `gemini` (`responseSchema` + `responseMimeType`).
+- **Unified provider model**: every provider is a `ProviderEntry` `{id, label, adapter, baseURL, apiKey, models[], keyUrl, builtin}` in `settings.providers` (localStorage — **keys are always saved**, no opt-out). Four builtins are seeded but fully editable — **DeepSeek** (`api.deepseek.com/v1`), **Kimi/Moonshot** (`api.moonshot.cn/v1`, `kimi-k2.6`/`k2.7`), **GLM/智谱** (`open.bigmodel.cn/api/paas/v4`, `glm-5.2`/etc.), **Gemini** — with default models; users can add multiple **custom** providers (own baseURL/key/models/adapter) and delete them. Picking a model implies the provider. Adding a new standard OpenAI-compatible provider = one built-in/seed entry. **OpenAI and Anthropic are deliberately not supported.**
 
 ## BYOK gotcha — transport is runtime-decided, not hardcoded
 
@@ -63,6 +61,17 @@ Required pre-commit order: **lint → typecheck → build**.
 - All provider implementations behind the `Provider` interface in `lib/providers/`. Never import a specific SDK from a component.
 - Prompt: shared structured-output instruction + the verbatim rule lives in `lib/providers/shared/prompt.ts`; English/Chinese-specific framing lives in `lib/providers/<adapter>/prompt/{en,zh}.ts`. Never inline prompts in components.
 - UI text and prompts: English-first unless the user asks otherwise.
+- Intentionally-unused destructured variables should use a `_` prefix (e.g., `_apiKey`); the eslint config already honors this pattern.
+- Disabling `react-hooks/set-state-in-effect` is acceptable when deriving state from an async result inside `useEffect` (see `app/page.tsx` and `hooks/useSettings.ts`). Document with a comment explaining why the rule does not apply. Put the `// eslint-disable-next-line react-hooks/set-state-in-effect` ON the exact line that calls setState — not on the effect line, not after the body (a misplaced disable triggers "Unused eslint-disable directive").
+
+## Editor implementation gotchas
+
+- The editor layers a transparent `<textarea>` over a visible overlay (`components/Editor.tsx`). When hiding text color, use `-webkit-text-fill-color: transparent` alongside `color: transparent` on WebKit/Blink, or selected text can leave a ghost/shadow. Also set `text-shadow: none` and style `::selection` explicitly.
+- Keep `padding`, `font-size`, `line-height`, `white-space`, and `overflow-wrap` identical between the textarea and overlay to prevent text misalignment.
+
+## Testing & debugging gotchas
+
+- When the user reports a UI element you can't grep in this codebase, don't guess — ask them to paste its HTML from DevTools first. Our classes are all `gp-*`; anything else (e.g. `tc-status-btn`, `tc-spinner`, `content.js` errors mentioning "extension settings") is a browser grammar/translate extension injecting into localhost, not our app.
 
 ## Open decisions (resolve as the project grows)
 

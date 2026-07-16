@@ -78,15 +78,26 @@ body {
   position: absolute; inset: 0; z-index: 2; overflow: auto; pointer-events: none;
   padding: 20px 24px; font-size: 20px; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: break-word; color: var(--gp-text);
+  scrollbar-gutter: stable;
+  user-select: none;
 }
 .gp-textarea {
   position: relative; z-index: 1; width: 100%; min-height: 120px;
   max-height: calc(100vh - 300px); /* never exceed viewport — leave room for chrome */
   resize: none; overflow-y: auto; background: transparent;
   color: transparent; caret-color: var(--gp-blue); outline: none;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
   padding: 20px 24px; font-size: 20px; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: break-word;
   font-family: inherit;
+  scrollbar-gutter: stable;
+}
+.gp-textarea::selection {
+  background: rgba(26, 115, 248, 0.3);
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  text-shadow: none;
 }
 .gp-toolbar {
   display: flex; align-items: center; justify-content: space-between;
@@ -130,8 +141,17 @@ body {
 
 /* ---- suggestion popover (centered) ---- */
 .gp-suggest {
-  margin: 20px auto 0; background: #fff; border: 1px solid var(--gp-line);
+  position: fixed;
+  bottom: 16px;
+  left: 0;
+  right: 0;
+  margin: 0 auto;
+  z-index: 50;
+  background: #fff; border: 1px solid var(--gp-line);
   border-radius: 12px; box-shadow: var(--gp-shadow-pop); overflow: hidden; max-width: 520px;
+}
+.gp-wrap.card-active .gp-textarea {
+  max-height: calc(100vh - 300px - var(--gp-card-height, 0px));
 }
 .gp-suggest .head { padding: 14px 18px 6px; display: flex; align-items: center; gap: 8px; }
 .gp-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; }

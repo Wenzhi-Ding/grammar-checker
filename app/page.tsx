@@ -1,6 +1,6 @@
 // app/page.tsx
 "use client";
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Editor } from "@/components/Editor";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { SettingsPanel } from "@/components/SettingsPanel";
@@ -21,6 +21,8 @@ export default function Home() {
   const [suggestions, setSuggestions] = useState<PinnedCorrection[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const [cardHeight, setCardHeight] = useState(0);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (status === "done" && result) {
@@ -148,7 +150,10 @@ export default function Home() {
         <SettingsPanel settings={settings} update={update} />
       </header>
 
-      <main className="gp-wrap">
+      <main
+        className={active ? "gp-wrap card-active" : "gp-wrap"}
+        style={active ? { "--gp-card-height": `${cardHeight}px` } : undefined}
+      >
         <div className="gp-card">
           <Editor
             text={text}
@@ -224,7 +229,9 @@ export default function Home() {
         )}
 
         {active && (
-          <SuggestionCard suggestion={active} onAccept={handleAccept} onReject={handleReject} />
+          <div ref={cardRef}>
+            <SuggestionCard suggestion={active} onAccept={handleAccept} onReject={handleReject} />
+          </div>
         )}
 
         {unmatched.length > 0 && (
