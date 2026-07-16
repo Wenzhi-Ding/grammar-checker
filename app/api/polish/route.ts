@@ -1,7 +1,7 @@
 // app/api/polish/route.ts
 import { NextRequest, NextResponse } from "next/server";
-import { createGeminiProvider } from "@/lib/providers/gemini/adapter";
-import { createOpenAICompatibleProvider } from "@/lib/providers/openai-compatible/adapter";
+import { createGeminiProvider, buildStreamRequest as buildGeminiStreamRequest } from "@/lib/providers/gemini/adapter";
+import { createOpenAICompatibleProvider, buildStreamRequest as buildOpenAIStreamRequest } from "@/lib/providers/openai-compatible/adapter";
 import type { ProviderConfig } from "@/lib/providers/shared/schema";
 import type { AdapterKind } from "@/lib/providers/shared/presets";
 
@@ -13,6 +13,7 @@ interface ProxyRequest {
   providerId: string;
   adapter: AdapterKind;
   payload: { text: string; config: ProviderConfig };
+  stream?: boolean;
 }
 
 export async function POST(req: NextRequest) {
@@ -29,6 +30,37 @@ export async function POST(req: NextRequest) {
       { error: "missing providerId, adapter, payload.config.apiKey, or payload.text" },
       { status: 400 },
     );
+  }
+
+  // Streaming passthrough: relay the upstream SSE byte stream untouched.
+  // Nothing is parsed, stored, cached, or logged — same stateless contract.
+  if (body.stream) {
+    try {
+      const { url, init } =
+        adapter === "gemini"
+          ? buildGeminiStreamRequest(payload.text, payload.config)
+          : buildOpenAIStreamRequest(payload.text, payload.config);
+      const upstream = await fetch(url, init);
+      if (!upstream.ok || !upstream.body) {
+        const detail = await upstream.text().catch(() => "");
+        return NextResponse.json(
+          { error: `upstream returned ${upstream.status}: ${detail.slice(0, 300)}` },
+          { status: upstream.ok ? 502 : upstream.status },
+        );
+      }
+      return new Response(upstream.body, {
+        status: 200,
+        headers: {
+          "Content-Type": "text/event-stream; charset=utf-8",
+          "Cache-Control": "no-cache, no-transform",
+          "X-Accel-Buffering": "no",
+        },
+      });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "proxy stream failed";
+      // SECURITY: never include the apiKey in the response or logs.
+      return NextResponse.json({ error: message }, { status: 502 });
+    }
   }
 
   try {
