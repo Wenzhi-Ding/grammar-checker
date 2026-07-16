@@ -26,6 +26,17 @@ describe("gemini adapter", () => {
     expect(out.corrections[0].suggestion).toBe("the");
   });
 
+  it("appends customInstructions to the system instruction", async () => {
+    const fetcher = mockFetch(JSON.stringify({ corrections: [] }));
+    const provider = createGeminiProvider({ fetchImpl: fetcher });
+    await provider.polish("hi", {
+      apiKey: "k", model: "gemini-3.5-flash", language: "en",
+      customInstructions: "Keep contractions.",
+    });
+    const body = JSON.parse((fetcher.mock.calls[0][1] as RequestInit).body as string);
+    expect(body.systemInstruction.parts[0].text).toContain("ADDITIONAL INSTRUCTIONS FROM THE USER:\nKeep contractions.");
+  });
+
   it("throws an Error with .status when gemini returns a non-OK response", async () => {
     const fetcher = vi.fn().mockResolvedValue({ ok: false, status: 403, json: async () => ({}) });
     const provider = createGeminiProvider({ fetchImpl: fetcher });

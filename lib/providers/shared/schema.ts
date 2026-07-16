@@ -40,6 +40,8 @@ export interface ProviderConfig {
   language?: "en" | "zh" | "auto";
   /** Language the LLM writes the `reason` field in (independent of the input text's language). */
   reasonLanguage?: "en" | "zh";
+  /** User-provided extra instructions appended to the system prompt (never replaces hard rules). */
+  customInstructions?: string;
 }
 
 export interface Provider {

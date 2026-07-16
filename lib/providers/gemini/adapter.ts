@@ -45,7 +45,7 @@ export function createGeminiProvider({ fetchImpl }: AdapterOpts = {}): Provider 
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          systemInstruction: { parts: [{ text: assembleSystem(framing, config.reasonLanguage) }] },
+          systemInstruction: { parts: [{ text: assembleSystem(framing, config.reasonLanguage, config.customInstructions) }] },
           contents: [{ role: "user", parts: [{ text: assembleUser(text) }] }],
           generationConfig: {
             responseMimeType: "application/json",

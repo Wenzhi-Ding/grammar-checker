@@ -23,7 +23,7 @@ export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): 
       }
 
       const messages = [
-        { role: "system", content: assembleSystem(framing, config.reasonLanguage) },
+        { role: "system", content: assembleSystem(framing, config.reasonLanguage, config.customInstructions) },
         { role: "user", content: assembleUser(text) },
       ];
 
