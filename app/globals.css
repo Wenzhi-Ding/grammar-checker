@@ -169,3 +169,9 @@ body {
 }
 .gp-input:focus, .gp-select:focus { border-color: var(--gp-blue); outline: none; box-shadow: 0 0 0 2px rgba(26, 115, 248, 0.15); }
 .gp-checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--gp-sub); }
+.gp-settings-row { display: flex; gap: 6px; align-items: center; margin-bottom: 12px; }
+.gp-settings-row .gp-select { flex: 1; }
+.gp-btn-mini { font-family: inherit; font-size: 12px; font-weight: 500; border-radius: 8px; padding: 7px 10px; cursor: pointer; border: 1px solid var(--gp-line); background: #fff; color: var(--gp-blue); white-space: nowrap; }
+.gp-btn-mini:hover { background: var(--gp-blue-soft); }
+.gp-btn-mini.gp-btn-danger { color: var(--gp-red-text); }
+.gp-models-area { min-height: 72px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; line-height: 1.5; white-space: pre; }

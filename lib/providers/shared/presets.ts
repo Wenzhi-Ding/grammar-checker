@@ -2,51 +2,68 @@
 
 export type AdapterKind = "openai-compatible" | "gemini";
 
-export interface ProviderPreset {
-  id: "deepseek" | "kimi" | "glm" | "gemini" | "custom";
+/**
+ * Unified provider structure — every provider (built-in or user-added custom)
+ * is described by this shape: baseURL, API key, and a list of models.
+ */
+export interface ProviderEntry {
+  id: string;
   label: string;
   adapter: AdapterKind;
-  baseURL: string;        // "" for gemini (uses SDK default) and custom (user fills)
-  defaultModel: string;
-  keyUrl: string;         // where to obtain an API key
+  baseURL: string;
+  apiKey: string;
+  models: string[];
+  keyUrl: string;
+  builtin: boolean;
 }
 
-export const PRESETS: ProviderPreset[] = [
-  { id: "deepseek", label: "DeepSeek",  adapter: "openai-compatible", baseURL: "https://api.deepseek.com/v1",          defaultModel: "deepseek-v4-pro",  keyUrl: "https://platform.deepseek.com" },
-  { id: "kimi",     label: "Kimi (Moonshot)", adapter: "openai-compatible", baseURL: "https://api.moonshot.cn/v1",       defaultModel: "kimi-k2.7-code",   keyUrl: "https://platform.moonshot.cn" },
-  { id: "glm",      label: "GLM (智谱)", adapter: "openai-compatible", baseURL: "https://open.bigmodel.cn/api/paas/v4", defaultModel: "glm-5.2",          keyUrl: "https://open.bigmodel.cn" },
-  { id: "gemini",   label: "Gemini",    adapter: "gemini",            baseURL: "",                                      defaultModel: "gemini-3.5-flash", keyUrl: "https://ai.google.dev" },
-  { id: "custom",   label: "Custom",    adapter: "openai-compatible", baseURL: "",                                      defaultModel: "",                 keyUrl: "" },
+export const BUILTIN_PROVIDERS: ProviderEntry[] = [
+  { id: "deepseek", label: "DeepSeek", adapter: "openai-compatible", baseURL: "https://api.deepseek.com/v1", apiKey: "", models: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-reasoner"], keyUrl: "https://platform.deepseek.com", builtin: true },
+  { id: "kimi", label: "Kimi (Moonshot)", adapter: "openai-compatible", baseURL: "https://api.moonshot.cn/v1", apiKey: "", models: ["kimi-k2.7-code", "moonshot-v1-8k", "moonshot-v1-32k"], keyUrl: "https://platform.moonshot.cn", builtin: true },
+  { id: "glm", label: "GLM (智谱)", adapter: "openai-compatible", baseURL: "https://open.bigmodel.cn/api/paas/v4", apiKey: "", models: ["glm-5.2", "glm-4-flash", "glm-4-air"], keyUrl: "https://open.bigmodel.cn", builtin: true },
+  { id: "gemini", label: "Gemini", adapter: "gemini", baseURL: "", apiKey: "", models: ["gemini-3.5-flash", "gemini-3.5-pro", "gemini-2.5-flash"], keyUrl: "https://ai.google.dev", builtin: true },
 ];
 
-export function getPreset(id: ProviderPreset["id"]): ProviderPreset {
-  const p = PRESETS.find((x) => x.id === id);
-  if (!p) throw new Error(`unknown provider preset: ${id}`);
-  return p;
+/** Fresh deep copies of the built-ins (for initial settings). */
+export function defaultProviders(): ProviderEntry[] {
+  return BUILTIN_PROVIDERS.map((p) => ({ ...p, models: [...p.models] }));
 }
 
-/** Selectable models per provider (curated). Custom is free-text, handled separately. */
-export const PROVIDER_MODELS: Record<ProviderPreset["id"], string[]> = {
-  deepseek: ["deepseek-v4-pro", "deepseek-v4-flash", "deepseek-reasoner"],
-  kimi: ["kimi-k2.7-code", "moonshot-v1-8k", "moonshot-v1-32k"],
-  glm: ["glm-5.2", "glm-4-flash", "glm-4-air"],
-  gemini: ["gemini-3.5-flash", "gemini-3.5-pro", "gemini-2.5-flash"],
-  custom: [],
-};
+/** Keep stored providers (preserving user edits + keys), but ensure every built-in exists. */
+export function mergeProviders(stored: ProviderEntry[]): ProviderEntry[] {
+  const result = [...stored];
+  for (const b of BUILTIN_PROVIDERS) {
+    if (!result.some((p) => p.id === b.id)) result.push({ ...b, models: [...b.models] });
+  }
+  return result;
+}
 
 export interface ModelOption {
-  provider: ProviderPreset["id"];
+  provider: ProviderEntry;
   model: string;
 }
 
-/** All selectable models from standard providers that currently have a key configured. */
-export function buildModelOptions(keys: Record<ProviderPreset["id"], string>): ModelOption[] {
+/** All selectable models from providers that have an API key configured. */
+export function buildModelOptions(providers: ProviderEntry[]): ModelOption[] {
   const opts: ModelOption[] = [];
-  for (const preset of PRESETS) {
-    if (preset.id === "custom") continue;
-    if (keys[preset.id]) {
-      for (const m of PROVIDER_MODELS[preset.id]) opts.push({ provider: preset.id, model: m });
-    }
+  for (const p of providers) {
+    if (!p.apiKey) continue;
+    for (const m of p.models) opts.push({ provider: p, model: m });
   }
   return opts;
+}
+
+let customCounter = 0;
+export function newCustomProvider(): ProviderEntry {
+  customCounter += 1;
+  return {
+    id: `custom-${Date.now()}-${customCounter}`,
+    label: `Custom ${customCounter}`,
+    adapter: "openai-compatible",
+    baseURL: "",
+    apiKey: "",
+    models: [],
+    keyUrl: "",
+    builtin: false,
+  };
 }

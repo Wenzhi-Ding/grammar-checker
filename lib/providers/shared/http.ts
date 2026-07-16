@@ -5,8 +5,7 @@ export interface DirectResponse<T = unknown> {
 }
 
 export interface ProxyBody {
-  provider: string;
-  payload: Record<string, unknown> & { apiKey?: string };
+  [key: string]: unknown;
 }
 
 /**

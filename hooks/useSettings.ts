@@ -1,45 +1,34 @@
 // hooks/useSettings.ts
 "use client";
 import { useEffect, useState, useCallback } from "react";
-import { type ProviderPreset } from "@/lib/providers/shared/presets";
-
-export type ProviderId = ProviderPreset["id"];
+import { defaultProviders, mergeProviders, type ProviderEntry } from "@/lib/providers/shared/presets";
 
 export interface Settings {
-  /** API key per provider. Empty string = not configured. */
-  keys: Record<ProviderId, string>;
-  /** Active provider (derived from the picked model, or custom). */
-  provider: ProviderId;
-  /** Active model. */
-  model: string;
-  /** baseURL for the custom provider. */
-  customBaseURL: string;
+  /** All providers (built-ins + user-added customs), each with its own baseURL/apiKey/models. */
+  providers: ProviderEntry[];
+  selectedProviderId: string;
+  selectedModel: string;
   language: "en" | "zh" | "auto";
   /** Language the LLM writes `reason` in. "auto" = browser language. */
   reasonLanguage: "en" | "zh" | "auto";
   rememberKey: boolean;
 }
 
-const STORAGE_KEY = "grammar-polisher.settings.v2";
-const STORAGE_KEY_NOSECRET = "grammar-polisher.settings.v2.nosecret";
-
-const EMPTY_KEYS: Record<ProviderId, string> = {
-  deepseek: "",
-  kimi: "",
-  glm: "",
-  gemini: "",
-  custom: "",
-};
+const STORAGE_KEY = "grammar-polisher.settings.v3";
+const STORAGE_KEY_NOSECRET = "grammar-polisher.settings.v3.nosecret";
 
 const DEFAULTS: Settings = {
-  keys: { ...EMPTY_KEYS },
-  provider: "deepseek",
-  model: "deepseek-v4-pro",
-  customBaseURL: "",
+  providers: defaultProviders(),
+  selectedProviderId: "deepseek",
+  selectedModel: "deepseek-v4-pro",
   language: "auto",
   reasonLanguage: "auto",
   rememberKey: false,
 };
+
+function stripKeys(providers: ProviderEntry[]): ProviderEntry[] {
+  return providers.map((p) => ({ ...p, apiKey: "" }));
+}
 
 function load(): Settings {
   if (typeof window === "undefined") return DEFAULTS;
@@ -50,9 +39,9 @@ function load(): Settings {
     const base: Settings = {
       ...DEFAULTS,
       ...parsed,
-      keys: { ...EMPTY_KEYS, ...(parsed.keys ?? {}) },
+      providers: mergeProviders(parsed.providers ?? defaultProviders()),
     };
-    if (!base.rememberKey) base.keys = { ...EMPTY_KEYS }; // never persist keys unless opted in
+    if (!base.rememberKey) base.providers = stripKeys(base.providers);
     return base;
   } catch {
     return DEFAULTS;
@@ -78,8 +67,8 @@ export function useSettings() {
           window.localStorage.removeItem(STORAGE_KEY_NOSECRET);
         } else {
           window.localStorage.removeItem(STORAGE_KEY);
-          const { keys: _k, ...rest } = next;
-          window.localStorage.setItem(STORAGE_KEY_NOSECRET, JSON.stringify(rest));
+          const safe = { ...next, providers: stripKeys(next.providers) };
+          window.localStorage.setItem(STORAGE_KEY_NOSECRET, JSON.stringify(safe));
         }
       } catch {
         /* ignore quota errors */

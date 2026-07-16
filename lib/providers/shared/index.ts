@@ -1,14 +1,21 @@
+// lib/providers/shared/index.ts
 import type { Provider } from "./schema";
-import { getPreset, type ProviderPreset } from "./presets";
+import type { AdapterKind } from "./presets";
 import { createOpenAICompatibleProvider } from "../openai-compatible/adapter";
 import { createGeminiProvider } from "../gemini/adapter";
 
-export function getProvider(presetId: ProviderPreset["id"]): Provider {
-  const preset = getPreset(presetId);
-  if (preset.adapter === "gemini") return createGeminiProvider();
-  return createOpenAICompatibleProvider({ id: preset.id });
+/** Pick the adapter implementation from a provider entry's adapter kind. */
+export function getProviderFor(entry: { id: string; adapter: AdapterKind }): Provider {
+  if (entry.adapter === "gemini") return createGeminiProvider();
+  return createOpenAICompatibleProvider({ id: entry.id });
 }
 
-export { PRESETS, getPreset } from "./presets";
-export type { ProviderPreset, AdapterKind } from "./presets";
+export {
+  BUILTIN_PROVIDERS,
+  defaultProviders,
+  mergeProviders,
+  buildModelOptions,
+  newCustomProvider,
+} from "./presets";
+export type { ProviderEntry, AdapterKind, ModelOption } from "./presets";
 export * from "./schema";

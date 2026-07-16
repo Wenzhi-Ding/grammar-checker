@@ -1,10 +1,10 @@
 // hooks/usePolish.ts
 "use client";
 import { useState, useCallback } from "react";
-import { getProvider } from "@/lib/providers/shared";
+import { getProviderFor } from "@/lib/providers/shared";
 import { callWithFallback } from "@/lib/providers/shared/http";
 import type { PolishResult, ProviderConfig } from "@/lib/providers/shared/schema";
-import type { ProviderPreset } from "@/lib/providers/shared/presets";
+import type { AdapterKind } from "@/lib/providers/shared/presets";
 
 export type PolishErrorKind = "no-key" | "auth" | "network" | "schema" | "rate-limit" | "timeout" | "empty";
 export interface PolishError { kind: PolishErrorKind; message: string; retryable: boolean }
@@ -27,7 +27,7 @@ export function usePolish() {
   const polish = useCallback(
     async (
       text: string,
-      opts: { presetId: ProviderPreset["id"]; config: ProviderConfig },
+      opts: { providerId: string; adapter: AdapterKind; config: ProviderConfig },
     ) => {
       if (!opts.config.apiKey) {
         setStatus("error");
@@ -37,16 +37,15 @@ export function usePolish() {
       setStatus("loading");
       setError(null);
       try {
-        const provider = getProvider(opts.presetId);
-        // direct call returns a PolishResult; wrap to match callWithFallback's DirectResponse<T>.
+        const provider = getProviderFor({ id: opts.providerId, adapter: opts.adapter });
         const direct = async () => {
           const body = await provider.polish(text, opts.config);
           return { ok: true as const, status: 200, body };
         };
-        // On TypeError (CORS/network), callWithFallback auto-retries via /api/polish,
-        // sending {provider, payload:{text, config}} — the route re-runs polish server-side.
+        // On TypeError (CORS/network), retry through the stateless /api/polish route.
         const proxyBody = {
-          provider: opts.presetId,
+          providerId: opts.providerId,
+          adapter: opts.adapter,
           payload: { text, config: opts.config },
         };
         const { body } = await callWithFallback<PolishResult>(direct, { proxyBody });

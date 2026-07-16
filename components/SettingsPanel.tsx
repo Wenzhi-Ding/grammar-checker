@@ -1,21 +1,34 @@
 // components/SettingsPanel.tsx
 "use client";
 import { useState } from "react";
-import { PRESETS, type ProviderPreset } from "@/lib/providers/shared/presets";
-import type { Settings, ProviderId } from "@/hooks/useSettings";
+import { newCustomProvider, type ProviderEntry, type AdapterKind } from "@/lib/providers/shared/presets";
+import type { Settings } from "@/hooks/useSettings";
 
 interface Props {
   settings: Settings;
   update: (patch: Partial<Settings>) => void;
 }
 
-const STANDARD = PRESETS.filter((p) => p.id !== "custom");
-
 export function SettingsPanel({ settings, update }: Props) {
   const [open, setOpen] = useState(false);
+  const [editId, setEditId] = useState<string>(settings.selectedProviderId);
 
-  const setKey = (id: ProviderId, value: string) =>
-    update({ keys: { ...settings.keys, [id]: value } });
+  const editing = settings.providers.find((p) => p.id === editId) ?? settings.providers[0];
+
+  const patchProvider = (id: string, patch: Partial<ProviderEntry>) =>
+    update({ providers: settings.providers.map((p) => (p.id === id ? { ...p, ...patch } : p)) });
+
+  const addCustom = () => {
+    const p = newCustomProvider();
+    update({ providers: [...settings.providers, p] });
+    setEditId(p.id);
+  };
+
+  const removeProvider = (id: string) => {
+    const remaining = settings.providers.filter((p) => p.id !== id);
+    update({ providers: remaining });
+    if (editId === id) setEditId(remaining[0]?.id ?? "");
+  };
 
   return (
     <div className="relative">
@@ -29,51 +42,75 @@ export function SettingsPanel({ settings, update }: Props) {
       </button>
       {open && (
         <div className="gp-settings">
-          <div className="gp-settings-title">API Keys</div>
+          <div className="gp-settings-row">
+            <select className="gp-select" value={editId} onChange={(e) => setEditId(e.target.value)}>
+              {settings.providers.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.label}
+                  {!p.builtin ? " (custom)" : ""}
+                </option>
+              ))}
+            </select>
+            <button className="gp-btn-mini" onClick={addCustom} title="Add a custom provider">
+              + Add
+            </button>
+            {editing && !editing.builtin && (
+              <button className="gp-btn-mini gp-btn-danger" onClick={() => removeProvider(editing.id)} title="Delete">
+                ✕
+              </button>
+            )}
+          </div>
 
-          {STANDARD.map((p: ProviderPreset) => (
-            <div key={p.id} className="gp-key-row">
-              <label className="gp-field-label">{p.label}</label>
+          {!editing?.builtin && (
+            <>
+              <label className="gp-field-label">Name</label>
               <input
                 className="gp-input"
-                type="password"
-                placeholder={p.keyUrl ? `从 ${p.keyUrl} 获取` : "粘贴 API Key"}
-                value={settings.keys[p.id]}
-                onChange={(e) => setKey(p.id, e.target.value)}
+                value={editing.label}
+                onChange={(e) => patchProvider(editing.id, { label: e.target.value })}
               />
-            </div>
-          ))}
+              <label className="gp-field-label">API type</label>
+              <select
+                className="gp-select"
+                value={editing.adapter}
+                onChange={(e) => patchProvider(editing.id, { adapter: e.target.value as AdapterKind })}
+              >
+                <option value="openai-compatible">OpenAI-compatible</option>
+                <option value="gemini">Gemini</option>
+              </select>
+            </>
+          )}
 
-          <div className="gp-settings-divider" />
-          <div className="gp-settings-title">Custom endpoint</div>
-          <div className="gp-key-row">
-            <label className="gp-field-label">Base URL</label>
-            <input
-              className="gp-input"
-              placeholder="https://..."
-              value={settings.customBaseURL}
-              onChange={(e) => update({ customBaseURL: e.target.value })}
-            />
-          </div>
-          <div className="gp-key-row">
-            <label className="gp-field-label">Custom API Key</label>
-            <input
-              className="gp-input"
-              type="password"
-              placeholder="粘贴 API Key"
-              value={settings.keys.custom}
-              onChange={(e) => setKey("custom", e.target.value)}
-            />
-          </div>
-          <div className="gp-key-row">
-            <label className="gp-field-label">Custom Model</label>
-            <input
-              className="gp-input"
-              placeholder="model name"
-              value={settings.provider === "custom" ? settings.model : ""}
-              onChange={(e) => update({ provider: "custom", model: e.target.value })}
-            />
-          </div>
+          <label className="gp-field-label">
+            Base URL{editing?.adapter === "gemini" ? " (n/a for Gemini)" : ""}
+          </label>
+          <input
+            className="gp-input"
+            value={editing?.baseURL ?? ""}
+            disabled={editing?.adapter === "gemini"}
+            placeholder="https://..."
+            onChange={(e) => patchProvider(editing.id, { baseURL: e.target.value })}
+          />
+
+          <label className="gp-field-label">API Key</label>
+          <input
+            className="gp-input"
+            type="password"
+            value={editing?.apiKey ?? ""}
+            placeholder={editing?.keyUrl ? `从 ${editing.keyUrl} 获取` : "粘贴 API Key"}
+            onChange={(e) => patchProvider(editing.id, { apiKey: e.target.value })}
+          />
+
+          <label className="gp-field-label">Models (one per line)</label>
+          <textarea
+            className="gp-input gp-models-area"
+            value={editing?.models.join("\n") ?? ""}
+            onChange={(e) =>
+              patchProvider(editing.id, {
+                models: e.target.value.split("\n").map((s) => s.trim()).filter(Boolean),
+              })
+            }
+          />
 
           <div className="gp-settings-divider" />
 
