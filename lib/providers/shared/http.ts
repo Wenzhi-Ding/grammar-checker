@@ -46,10 +46,12 @@ export async function callWithFallback<T = unknown>(
  * (browser CORS/network opaque failure, thrown BEFORE any stream bytes are
  * consumed) triggers one proxy retry via /api/polish with `stream: true`
  * added to the body. Mid-stream failures must NOT be retried here.
+ * `opts.signal` is forwarded to the proxy fetch so abort works on the
+ * fallback path too.
  */
 export async function callStreamWithFallback(
   direct: () => Promise<Response>,
-  opts: { proxyBody: ProxyBody },
+  opts: { proxyBody: ProxyBody; signal?: AbortSignal },
   proxyFetch?: (url: string, init: RequestInit) => Promise<Response>,
 ): Promise<Response> {
   try {
@@ -61,6 +63,7 @@ export async function callStreamWithFallback(
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...opts.proxyBody, stream: true }),
+      signal: opts.signal ?? null,
     });
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { error?: string };

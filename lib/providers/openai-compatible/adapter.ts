@@ -78,7 +78,7 @@ async function readChatStream(res: Response, onToken: (approxTokens: number) => 
     const usage = chunk.usage?.completion_tokens;
     if (typeof usage === "number") usageTokens = usage;
   }
-  if (usageTokens !== null) onToken(usageTokens);
+  if (usageTokens !== null) onToken(Math.max(approx, usageTokens));
   return parsePolishResult(content);
 }
 
@@ -103,7 +103,7 @@ export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): 
       const { url, init } = buildStreamRequest(text, config);
       const res = await callStreamWithFallback(
         () => fetchFn(url, { ...init, signal }),
-        { proxyBody: { providerId: id, adapter: "openai-compatible", payload: { text, config } } },
+        { proxyBody: { providerId: id, adapter: "openai-compatible", payload: { text, config } }, signal },
         (u, i) => fetchFn(u, i),
       );
       if (!res.ok) {

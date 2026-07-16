@@ -51,4 +51,14 @@ describe("callStreamWithFallback", () => {
       message: "rate limited",
     });
   });
+
+  it("forwards opts.signal to the proxy fetch", async () => {
+    const ac = new AbortController();
+    const proxyRes = { ok: true, status: 200 } as unknown as Response;
+    const direct = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const proxyFetch = vi.fn().mockResolvedValue(proxyRes);
+    await callStreamWithFallback(direct, { proxyBody: {}, signal: ac.signal }, proxyFetch);
+    const init = proxyFetch.mock.calls[0][1] as RequestInit;
+    expect(init.signal).toBe(ac.signal);
+  });
 });

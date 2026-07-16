@@ -80,4 +80,12 @@ describe("openai-compatible polishStream", () => {
     const provider = createOpenAICompatibleProvider({ id: "deepseek", fetchImpl: fetcher });
     await expect(provider.polishStream!("hi", CONFIG, () => {})).rejects.toThrow(SyntaxError);
   });
+
+  it("aborts without proxy retry when the signal fires pre-stream", async () => {
+    const fetcher = vi.fn().mockRejectedValue(new DOMException("The operation was aborted.", "AbortError"));
+    const provider = createOpenAICompatibleProvider({ id: "deepseek", fetchImpl: fetcher });
+    const ac = new AbortController();
+    await expect(provider.polishStream!("hi", CONFIG, () => {}, ac.signal)).rejects.toMatchObject({ name: "AbortError" });
+    expect(fetcher).toHaveBeenCalledTimes(1);
+  });
 });
