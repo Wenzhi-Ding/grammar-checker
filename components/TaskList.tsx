@@ -28,7 +28,12 @@ export function TaskList({ tasks, focusedId, onPick, onRemove }: TaskListProps) 
             .join(" ");
           return (
             <li key={t.id}>
-              <button type="button" className={cls} onClick={() => onPick(t.id)}>
+              <button
+                type="button"
+                className={cls}
+                onClick={() => onPick(t.id)}
+                aria-current={t.id === focusedId ? "true" : undefined}
+              >
                 <span className="gp-task-top">
                   <span className="gp-task-snippet">{taskSnippet(t.text)}</span>
                   {t.status === "done" && t.unread && <span className="gp-task-dot" />}
@@ -45,6 +50,7 @@ export function TaskList({ tasks, focusedId, onPick, onRemove }: TaskListProps) 
                 type="button"
                 className="gp-task-remove"
                 title="删除"
+                aria-label="删除"
                 onClick={() => onRemove(t.id)}
               >
                 ×
