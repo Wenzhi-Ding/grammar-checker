@@ -10,9 +10,9 @@ interface Props {
 export function ProviderSelect({ value, onChange }: Props) {
   return (
     <select
+      className="gp-select"
       value={value}
       onChange={(e) => onChange(e.target.value as ProviderPreset["id"])}
-      className="rounded border border-gray-300 px-2 py-1"
     >
       {PRESETS.map((p) => (
         <option key={p.id} value={p.id}>

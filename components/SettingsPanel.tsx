@@ -19,21 +19,22 @@ export function SettingsPanel({ settings, update }: Props) {
     <div className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="rounded border border-gray-300 px-3 py-1 text-sm"
+        className="gp-icon-btn"
         aria-label="Settings"
+        title="Settings"
       >
         ⚙️
       </button>
       {open && (
-        <div className="absolute right-0 z-20 mt-2 w-80 rounded-lg border border-gray-200 bg-white p-4 shadow-xl">
-          <label className="mb-1 block text-xs font-semibold uppercase text-gray-500">Provider</label>
+        <div className="gp-settings">
+          <label className="gp-field-label">Provider</label>
           <ProviderSelect value={settings.presetId} onChange={(id) => update({ presetId: id })} />
 
           {isCustom && (
             <>
-              <label className="mt-3 block text-xs font-semibold uppercase text-gray-500">Base URL</label>
+              <label className="gp-field-label">Base URL</label>
               <input
-                className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+                className="gp-input"
                 placeholder="https://..."
                 value={settings.baseURL}
                 onChange={(e) => update({ baseURL: e.target.value })}
@@ -41,15 +42,15 @@ export function SettingsPanel({ settings, update }: Props) {
             </>
           )}
 
-          <label className="mt-3 block text-xs font-semibold uppercase text-gray-500">API Key</label>
+          <label className="gp-field-label">API Key</label>
           <input
+            className="gp-input"
             type="password"
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
             placeholder={preset.keyUrl ? `从 ${preset.keyUrl} 获取` : "粘贴 API Key"}
             value={settings.apiKey}
             onChange={(e) => update({ apiKey: e.target.value })}
           />
-          <label className="mt-2 flex items-center gap-2 text-xs text-gray-600">
+          <label className="gp-checkbox-row">
             <input
               type="checkbox"
               checked={settings.rememberKey}
@@ -58,16 +59,16 @@ export function SettingsPanel({ settings, update }: Props) {
             记住 Key（存到本机 localStorage）
           </label>
 
-          <label className="mt-3 block text-xs font-semibold uppercase text-gray-500">Model</label>
+          <label className="gp-field-label">Model</label>
           <input
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="gp-input"
             value={settings.model}
             onChange={(e) => update({ model: e.target.value })}
           />
 
-          <label className="mt-3 block text-xs font-semibold uppercase text-gray-500">Language</label>
+          <label className="gp-field-label">Language</label>
           <select
-            className="mt-1 w-full rounded border border-gray-300 px-2 py-1 text-sm"
+            className="gp-select"
             value={settings.language}
             onChange={(e) => update({ language: e.target.value as Settings["language"] })}
           >

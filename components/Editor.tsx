@@ -31,21 +31,18 @@ export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick
   }, []);
 
   return (
-    <div className="relative w-full">
-      <div
-        ref={overlayRef}
-        className="absolute inset-0 overflow-auto whitespace-pre-wrap break-words px-4 py-3 pointer-events-none"
-        aria-hidden
-      >
+    <div className="gp-editor-wrap">
+      <div ref={overlayRef} className="gp-overlay" aria-hidden>
         <HighlightOverlay text={text} suggestions={suggestions} activeId={activeId} onPick={onPick} />
       </div>
       <textarea
         ref={taRef}
-        className="relative w-full min-h-[20rem] resize-y bg-transparent px-4 py-3 outline-none"
-        style={{ color: "transparent", caretColor: "currentColor" }}
+        className="gp-textarea"
+        style={readOnly ? { pointerEvents: "none" } : undefined}
         value={text}
         readOnly={readOnly}
         spellCheck={false}
+        placeholder="Paste or type your text here…"
         onChange={(e: ChangeEvent<HTMLTextAreaElement>) => onChange(e.target.value)}
       />
     </div>

@@ -1,26 +1,155 @@
 @import "tailwindcss";
 
+/* ===== Grammar Polisher — Google Translate visual language ===== */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --gp-blue: #1a73f8;
+  --gp-blue-h: #1765cc;
+  --gp-blue-soft: #f1f6fe;
+  --gp-text: #202124;
+  --gp-sub: #5f6368;
+  --gp-line: #dadce0;
+  --gp-bg: #f8f9fa;
+  --gp-card: #ffffff;
+  --gp-chip: #f1f3f4;
+  --gp-red: #ea4335;
+  --gp-red-soft: #fce8e6;
+  --gp-red-text: #d93025;
+  --gp-purple: #a142f4;
+  --gp-green: #1e8e3e;
+  --gp-yellow-bg: rgba(255, 235, 59, 0.35);
+  --gp-shadow: 0 1px 3px rgba(60, 64, 67, 0.08);
+  --gp-shadow-pop: 0 4px 16px rgba(60, 64, 67, 0.16);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+html, body {
+  background: var(--gp-bg);
+  color: var(--gp-text);
 }
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-roboto), Roboto, "Google Sans", Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+/* ---- top bar ---- */
+.gp-topbar {
+  height: 64px; background: #fff; border-bottom: 1px solid var(--gp-line);
+  display: flex; align-items: center; padding: 0 24px;
+  position: sticky; top: 0; z-index: 30;
+}
+.gp-logo { display: flex; align-items: center; gap: 10px; font-size: 20px; color: var(--gp-text); font-weight: 500; }
+.gp-logo .dot {
+  width: 34px; height: 34px; border-radius: 50%;
+  background: linear-gradient(135deg, #4285f4, #1a73f8 60%, #a142f4);
+  display: flex; align-items: center; justify-content: center; color: #fff; font-size: 16px; font-weight: 700;
+}
+.gp-spacer { flex: 1; }
+
+/* ---- round icon button ---- */
+.gp-icon-btn {
+  width: 40px; height: 40px; border-radius: 50%; border: none; background: transparent;
+  cursor: pointer; color: var(--gp-sub); font-size: 17px;
+  display: flex; align-items: center; justify-content: center; transition: background 0.15s;
+}
+.gp-icon-btn:hover { background: rgba(60, 64, 67, 0.08); }
+
+/* ---- centered page wrap ---- */
+.gp-wrap { max-width: 760px; margin: 40px auto 80px; padding: 0 20px; }
+
+/* ---- source/target segmented bar ---- */
+.gp-segbar { display: flex; gap: 8px; margin-bottom: 16px; align-items: center; }
+.gp-seg {
+  flex: 1; background: #fff; border: 1px solid var(--gp-line); border-radius: 12px;
+  padding: 12px 18px; display: flex; align-items: center; justify-content: space-between;
+}
+.gp-seg .lang { color: var(--gp-text); font-weight: 500; font-size: 15px; }
+.gp-seg .hint { font-size: 12px; color: var(--gp-sub); }
+.gp-swap {
+  width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 1px solid var(--gp-line);
+  display: flex; align-items: center; justify-content: center; color: var(--gp-blue); font-size: 16px;
+}
+
+/* ---- main editor card ---- */
+.gp-card {
+  background: var(--gp-card); border: 1px solid var(--gp-line); border-radius: 12px;
+  box-shadow: var(--gp-shadow); overflow: hidden;
+}
+.gp-editor-wrap { position: relative; width: 100%; }
+.gp-overlay {
+  position: absolute; inset: 0; overflow: auto; pointer-events: none;
+  padding: 20px 24px; font-size: 20px; line-height: 1.6;
+  white-space: pre-wrap; overflow-wrap: break-word; color: var(--gp-text);
+}
+.gp-textarea {
+  position: relative; width: 100%; min-height: 160px; resize: vertical; background: transparent;
+  color: transparent; caret-color: var(--gp-blue); outline: none;
+  padding: 20px 24px; font-size: 20px; line-height: 1.6;
+  white-space: pre-wrap; overflow-wrap: break-word;
+  font-family: inherit;
+}
+.gp-toolbar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 6px 12px; border-top: 1px solid var(--gp-line); background: #fbfcfe;
+}
+.gp-count { font-size: 13px; color: var(--gp-sub); }
+.gp-acts { display: flex; gap: 2px; }
+
+/* ---- grammarly-style wavy underlines ---- */
+.gp-hl { cursor: pointer; border-radius: 2px; transition: background 0.12s; }
+.gp-hl:hover { background: rgba(26, 115, 248, 0.08); }
+.gp-hl-grammar { text-decoration: underline wavy var(--gp-red); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.gp-hl-style { text-decoration: underline wavy var(--gp-blue); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.gp-hl-clarity { text-decoration: underline wavy var(--gp-purple); text-underline-offset: 4px; text-decoration-thickness: 2px; }
+.gp-hl-major { text-decoration-thickness: 3px; }
+.gp-hl-active { background: var(--gp-yellow-bg); border-radius: 3px; }
+
+/* ---- buttons ---- */
+.gp-btn {
+  font-family: inherit; font-size: 14px; font-weight: 500; border-radius: 8px;
+  padding: 10px 24px; cursor: pointer; border: 1px solid var(--gp-line);
+  background: #fff; color: var(--gp-blue); transition: background 0.15s;
+}
+.gp-btn:hover { background: var(--gp-blue-soft); }
+.gp-btn:disabled { opacity: 0.4; cursor: default; }
+.gp-btn-primary { background: var(--gp-blue); color: #fff; border-color: var(--gp-blue); }
+.gp-btn-primary:hover { background: var(--gp-blue-h); box-shadow: 0 1px 3px rgba(26, 115, 248, 0.4); }
+.gp-btn-primary:disabled:hover { background: var(--gp-blue); box-shadow: none; }
+.gp-actionrow { display: flex; justify-content: flex-end; margin-top: 16px; gap: 10px; }
+
+/* ---- suggestion popover (centered) ---- */
+.gp-suggest {
+  margin: 20px auto 0; background: #fff; border: 1px solid var(--gp-line);
+  border-radius: 12px; box-shadow: var(--gp-shadow-pop); overflow: hidden; max-width: 520px;
+}
+.gp-suggest .head { padding: 14px 18px 6px; display: flex; align-items: center; gap: 8px; }
+.gp-badge { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 3px 8px; border-radius: 20px; }
+.gp-badge-type { background: var(--gp-chip); color: var(--gp-sub); }
+.gp-badge-major { background: #fef7e0; color: #b06000; }
+.gp-badge-minor { background: #e6f4ea; color: var(--gp-green); }
+.gp-diff { padding: 0 18px; font-size: 18px; line-height: 1.5; }
+.gp-diff .old { color: var(--gp-red-text); text-decoration: line-through; }
+.gp-diff .new { color: var(--gp-green); font-weight: 500; }
+.gp-reason { padding: 8px 18px 14px; color: var(--gp-sub); font-size: 14px; line-height: 1.5; }
+.gp-suggest .foot { display: flex; justify-content: flex-end; gap: 8px; padding: 10px 14px; border-top: 1px solid var(--gp-line); background: #fbfcfe; }
+.gp-suggest .foot .gp-btn { padding: 8px 20px; }
+
+/* ---- info / error / unmatched panels ---- */
+.gp-panel { border-radius: 12px; padding: 12px 16px; font-size: 14px; margin-top: 16px; }
+.gp-panel-error { border: 1px solid #f3c3c0; background: var(--gp-red-soft); color: var(--gp-red-text); }
+.gp-panel-empty { border: 1px solid var(--gp-line); background: #fff; color: var(--gp-sub); }
+.gp-panel-unmatched { border: 1px solid var(--gp-line); background: #fff; color: var(--gp-sub); }
+.gp-panel-unmatched summary { cursor: pointer; }
+
+/* ---- settings dropdown ---- */
+.gp-settings {
+  position: absolute; right: 0; top: 48px; z-index: 40; width: 320px;
+  background: #fff; border: 1px solid var(--gp-line); border-radius: 12px;
+  box-shadow: var(--gp-shadow-pop); padding: 18px;
+}
+.gp-field-label { display: block; font-size: 11px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; color: var(--gp-sub); margin-bottom: 6px; }
+.gp-field-label:not(:first-child) { margin-top: 16px; }
+.gp-input, .gp-select {
+  width: 100%; border: 1px solid var(--gp-line); border-radius: 8px; padding: 9px 10px;
+  font-size: 14px; font-family: inherit; color: var(--gp-text); background: #fff;
+}
+.gp-input:focus, .gp-select:focus { border-color: var(--gp-blue); outline: none; box-shadow: 0 0 0 2px rgba(26, 115, 248, 0.15); }
+.gp-checkbox-row { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 13px; color: var(--gp-sub); }

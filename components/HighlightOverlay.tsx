@@ -10,13 +10,13 @@ interface OverlayProps {
   onPick: (id: string | null) => void;
 }
 
-const TYPE_COLOR: Record<CorrectionType, string> = {
-  grammar: "red",
-  spelling: "red",
-  punctuation: "red",
-  style: "blue",
-  "word-choice": "blue",
-  clarity: "purple",
+const TYPE_CLASS: Record<CorrectionType, string> = {
+  grammar: "gp-hl-grammar",
+  spelling: "gp-hl-grammar",
+  punctuation: "gp-hl-grammar",
+  style: "gp-hl-style",
+  "word-choice": "gp-hl-style",
+  clarity: "gp-hl-clarity",
 };
 
 export function HighlightOverlay({ text, suggestions, activeId, onPick }: OverlayProps) {
@@ -30,20 +30,17 @@ export function HighlightOverlay({ text, suggestions, activeId, onPick }: Overla
   for (const m of marks) {
     if (m.start < cursor) continue; // skip overlaps defensively
     if (m.start > cursor) nodes.push(<Fragment key={`t-${cursor}`}>{text.slice(cursor, m.start)}</Fragment>);
-    const color = TYPE_COLOR[m.type];
-    const weight = m.severity === "major" ? 3 : 2;
+    const cls = [
+      "gp-hl pointer-events-auto",
+      TYPE_CLASS[m.type],
+      m.severity === "major" ? "gp-hl-major" : "",
+      activeId === m.id ? "gp-hl-active" : "",
+    ].join(" ");
     nodes.push(
       <mark
         key={m.id}
         data-id={m.id}
-        className="cursor-pointer rounded-sm pointer-events-auto"
-        style={{
-          textDecoration: "underline",
-          textDecorationColor: color,
-          textDecorationThickness: weight,
-          textUnderlineOffset: 3,
-          backgroundColor: activeId === m.id ? "rgba(255,235,59,0.35)" : "transparent",
-        }}
+        className={cls}
         onClick={(e) => {
           e.stopPropagation();
           onPick(activeId === m.id ? null : m.id);
@@ -57,8 +54,6 @@ export function HighlightOverlay({ text, suggestions, activeId, onPick }: Overla
   if (cursor < text.length) nodes.push(<Fragment key={`t-end`}>{text.slice(cursor)}</Fragment>);
 
   return (
-    <div className="whitespace-pre-wrap break-words" onClick={() => onPick(null)}>
-      {nodes}
-    </div>
+    <div onClick={() => onPick(null)}>{nodes}</div>
   );
 }
