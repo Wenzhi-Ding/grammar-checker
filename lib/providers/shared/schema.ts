@@ -47,4 +47,16 @@ export interface ProviderConfig {
 export interface Provider {
   readonly id: string;
   polish(text: string, config: ProviderConfig): Promise<PolishResult>;
+  /**
+   * Streaming variant. onToken fires with the CUMULATIVE approximate output
+   * token count as deltas arrive (monotonic, non-decreasing). Falls back to
+   * the /api/polish proxy on a CORS/network TypeError before the stream
+   * starts; mid-stream failures are NOT retried.
+   */
+  polishStream?(
+    text: string,
+    config: ProviderConfig,
+    onToken: (approxTokens: number) => void,
+    signal?: AbortSignal,
+  ): Promise<PolishResult>;
 }
