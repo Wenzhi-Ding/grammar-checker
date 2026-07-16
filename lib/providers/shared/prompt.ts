@@ -5,7 +5,7 @@ export const CORRECTION_TYPES = [
 ] as const;
 
 /** The verbatim rule — the matching engine depends on this. Every prompt MUST include it. */
-export const VERBATIM_RULE = `CRITICAL RULE: The "original" field of each correction MUST be a VERBATIM copy of the exact characters from the input, including any errors and any whitespace/newline characters. Do NOT normalize whitespace, quotes, punctuation, or casing in "original". The frontend locates each correction by exact substring match. Return corrections in the order they appear in the text.`;
+export const VERBATIM_RULE = `CRITICAL RULE: The "original" field of each correction MUST be a VERBATIM copy of the exact characters from the input — including any errors, and INCLUDING any whitespace or newline ("\\n") characters. Do NOT normalize whitespace, newlines, quotes, punctuation, or casing in "original": the frontend locates each correction by exact substring match, so any normalization will make it un-findable. Return corrections in the order they appear in the text.`;
 
 export const SCHEMA_DESCRIPTION = `Return ONLY a JSON object of this exact shape (no prose, no markdown fences):
 {
@@ -19,19 +19,29 @@ export const SCHEMA_DESCRIPTION = `Return ONLY a JSON object of this exact shape
     }
   ]
 }
-If there is nothing to correct, return {"corrections": []}.
-
-The "formatting" type covers whitespace/line-layout issues: an inappropriate line break (a word, clause, or quote broken mid-way across a line), a missing or extra blank line between paragraphs, doubled spaces, or stray whitespace. For such fixes, "original" must contain the exact whitespace/newline characters to be replaced.`;
+If there is nothing to correct, return {"corrections": []}.`;
 
 /** Coverage directive — push for thorough, diverse, comprehensive correction. */
 export const COVERAGE_RULE = `Be thorough and comprehensive: review the ENTIRE text sentence by sentence and surface every real issue you can find, spanning ALL applicable types. Do NOT fixate on a single category of error, and do NOT stay silent on a genuine problem just because it is minor. At the same time, only flag real issues — skip trivial or purely-preferential substitutions that do not clearly improve the text.`;
+
+/** Formatting / line-break rule — forceful, with an explicit newline example. */
+export const FORMATTING_RULE = `FORMATTING / LINE BREAKS — check these carefully and FIX them (type "formatting"):
+- A hard line break that splits a single sentence, clause, or word across two lines is usually inappropriate — flag it.
+- A missing blank line where a new paragraph/topic starts, or an extra blank line mid-paragraph — flag it.
+- Doubled spaces, stray trailing spaces, missing/inconsistent spacing after punctuation.
+CRITICAL for these fixes: "original" MUST contain the LITERAL newline ("\\n") exactly as it appears in the input. For example, if the input has a sentence broken as:
+
+  This sentence is
+  broken mid-way.
+
+return original = "is\\nbroken mid-way" (with a literal "\\n") and suggestion = "is broken mid-way". Do NOT replace the newline with a space inside "original", or the frontend's substring match will fail and the fix will be dropped.`;
 
 export function reasonLanguageName(lang: "en" | "zh"): string {
   return lang === "zh" ? "Simplified Chinese (简体中文)" : "English";
 }
 
 export function assembleSystem(sharedFraming: string, reasonLanguage?: "en" | "zh"): string {
-  const parts = [sharedFraming, COVERAGE_RULE, SCHEMA_DESCRIPTION, VERBATIM_RULE];
+  const parts = [sharedFraming, COVERAGE_RULE, FORMATTING_RULE, SCHEMA_DESCRIPTION, VERBATIM_RULE];
   if (reasonLanguage) {
     // Decouple explanation language from the input text's language:
     // correct the text in its own language, but write reasons in the user's chosen language.
