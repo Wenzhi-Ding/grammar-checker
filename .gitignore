@@ -48,3 +48,6 @@ yarn-error.log*
 
 # local-only
 .superpowers/
+
+# eval reports (local runs)
+/eval/reports/
