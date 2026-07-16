@@ -1,0 +1,87 @@
+[
+  {
+    "id": "en-001",
+    "language": "en",
+    "input": "Me and him goes to school by bus everyday.",
+    "reference": ["Me and him → subject case and order (He and I)", "goes → go", "everyday → every day"]
+  },
+  {
+    "id": "en-002",
+    "language": "en",
+    "input": "Its obvious that their not going to except the offer.",
+    "reference": ["Its → It's", "their → they're", "except → accept"]
+  },
+  {
+    "id": "en-003",
+    "language": "en",
+    "input": "I recieved teh package yesterday, but it was seperate from what I definately ordered.",
+    "reference": ["recieved → received", "teh → the", "seperate → separate", "definately → definitely"]
+  },
+  {
+    "id": "en-004",
+    "language": "en",
+    "input": "The meeting ran late, we decided to continue it tomorrow.",
+    "reference": ["comma splice — split into two sentences or use a conjunction/semicolon"]
+  },
+  {
+    "id": "en-005",
+    "language": "en",
+    "input": "She is a honest person who gave me an unique gift a hour ago.",
+    "reference": ["a honest → an honest", "an unique → a unique", "a hour → an hour"]
+  },
+  {
+    "id": "en-006",
+    "language": "en",
+    "input": "The team are playing well, and each of the players have a clear role.",
+    "reference": ["The team are → The team is (collective noun, singular)", "each of the players have → has"]
+  },
+  {
+    "id": "en-007",
+    "language": "en",
+    "input": "After the long and exhausting meeting the committee decided to adjourn.",
+    "reference": ["missing comma after the introductory phrase (after 'meeting')"]
+  },
+  {
+    "id": "en-008",
+    "language": "en",
+    "input": "In order to finish the end result, each and every one of us must cooperate together.",
+    "reference": ["In order to → To", "the end result → the result / the end", "each and every → each (or every)", "cooperate together → cooperate"]
+  },
+  {
+    "id": "en-009",
+    "language": "en",
+    "input": "on monday, i visited the eiffel tower in paris.",
+    "reference": ["on → On", "i → I", "eiffel tower → Eiffel Tower", "paris → Paris"]
+  },
+  {
+    "id": "en-010",
+    "language": "en",
+    "input": "The dogs bone was buried in the Smiths garden, and its been there for weeks.",
+    "reference": ["dogs → dog's", "Smiths → Smiths' (or the Smiths')", "its → it's"]
+  },
+  {
+    "id": "en-011",
+    "language": "en",
+    "input": "The new policy had a positive affect on morale, which was better then expected.",
+    "reference": ["affect → effect", "then → than"]
+  },
+  {
+    "id": "en-012",
+    "language": "en",
+    "input": "The quarterly report shows that revenue\nincreased by twelve percent this year.",
+    "reference": ["hard line break splits one sentence — join into a single line (the 'original' span must contain the literal newline)"]
+  },
+  {
+    "id": "en-013",
+    "language": "en",
+    "input": "If your going to the conference, who's presentation are you planning to see?",
+    "reference": ["your → you're", "who's → whose"]
+  },
+  {
+    "id": "en-014",
+    "language": "en",
+    "input": "The committee published its findings after a thorough review of the evidence.",
+    "reference": [],
+    "notes": "Clean text — no corrections expected. Any change should be clearly optional and non-harmful."
+  }
+]
