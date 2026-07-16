@@ -55,6 +55,8 @@ npm run typecheck  # if not present, add: tsc --noEmit
 
 Required pre-commit order: **lint → typecheck → build**.
 
+- **`EBUSY: resource busy or locked` on `.next/`** during `npm run build` is Dropbox locking build artifacts, not your diff — if `Compiled successfully` / `Finished TypeScript` / `Generating static pages` all passed, the failure is in the export-cleanup step only. Stop Dropbox (or delete `.next/`) and retry; don't bisect your code.
+
 ## Baseline check at session start
 
 Before starting work, run `npm run typecheck` once. If it fails on files you haven't
@@ -75,6 +77,10 @@ your own diff against a red baseline you didn't create.
 
 - The editor layers a transparent `<textarea>` over a visible overlay (`components/Editor.tsx`). When hiding text color, use `-webkit-text-fill-color: transparent` alongside `color: transparent` on WebKit/Blink, or selected text can leave a ghost/shadow. Also set `text-shadow: none` and style `::selection` explicitly.
 - Keep `padding`, `font-size`, `line-height`, `white-space`, and `overflow-wrap` identical between the textarea and overlay to prevent text misalignment.
+
+## UI / CSS gotchas
+
+- **SVG next to text in a flex/inline-flex row**: Tailwind preflight injects `svg { display: block }`, which can stack an inline icon onto its own line (especially if the parent's flex isn't engaging or CSS is half-cached). When placing an SVG beside text, defensively scope a rule: `.container svg { display: inline-block; flex: none; vertical-align: middle; }`. Don't rely on `inline-flex` of the parent alone — and remember you cannot visually verify rendered CSS (no image input), so prefer the defensive form up front.
 
 ## Testing & debugging gotchas
 
