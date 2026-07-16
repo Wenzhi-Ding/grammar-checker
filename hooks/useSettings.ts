@@ -13,8 +13,12 @@ export interface Settings {
   reasonLanguage: "en" | "zh" | "auto";
 }
 
-const STORAGE_KEY = "grammar-polisher.settings.v3";
-const LEGACY_NOSECRET = "grammar-polisher.settings.v3.nosecret";
+const STORAGE_KEY = "grammar-polisher.settings.v4";
+const LEGACY_KEYS = [
+  "grammar-polisher.settings.v3",
+  "grammar-polisher.settings.v3.nosecret",
+  "grammar-polisher.settings.v2",
+];
 
 const DEFAULTS: Settings = {
   providers: defaultProviders(),
@@ -24,17 +28,38 @@ const DEFAULTS: Settings = {
   reasonLanguage: "auto",
 };
 
+/** Migrate from older storage: use FRESH builtin seeds (new model lists + new builtins),
+ *  carry over saved API keys by id, and keep any user-added custom providers intact. */
+function migrate(parsed: Partial<Settings>): Settings {
+  const fresh = defaultProviders();
+  const old = parsed.providers ?? [];
+  const providers = [
+    ...fresh.map((p) => ({ ...p, apiKey: old.find((s) => s.id === p.id)?.apiKey ?? "" })),
+    ...old.filter((s) => !s.builtin),
+  ];
+  return {
+    ...DEFAULTS,
+    selectedProviderId: parsed.selectedProviderId ?? DEFAULTS.selectedProviderId,
+    selectedModel: parsed.selectedModel ?? DEFAULTS.selectedModel,
+    language: parsed.language ?? DEFAULTS.language,
+    reasonLanguage: parsed.reasonLanguage ?? DEFAULTS.reasonLanguage,
+    providers,
+  };
+}
+
 function load(): Settings {
   if (typeof window === "undefined") return DEFAULTS;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_NOSECRET);
-    if (!raw) return DEFAULTS;
-    const parsed = JSON.parse(raw) as Partial<Settings>;
-    return {
-      ...DEFAULTS,
-      ...parsed,
-      providers: mergeProviders(parsed.providers ?? defaultProviders()),
-    };
+    const v4 = window.localStorage.getItem(STORAGE_KEY);
+    if (v4) {
+      const parsed = JSON.parse(v4) as Partial<Settings>;
+      return { ...DEFAULTS, ...parsed, providers: mergeProviders(parsed.providers ?? defaultProviders()) };
+    }
+    for (const key of LEGACY_KEYS) {
+      const raw = window.localStorage.getItem(key);
+      if (raw) return migrate(JSON.parse(raw) as Partial<Settings>);
+    }
+    return DEFAULTS;
   } catch {
     return DEFAULTS;
   }
