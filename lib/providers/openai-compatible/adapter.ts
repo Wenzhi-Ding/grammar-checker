@@ -79,15 +79,7 @@ async function readChatStream(res: Response, onToken: (approxTokens: number) => 
     if (typeof usage === "number") usageTokens = usage;
   }
   if (usageTokens !== null) onToken(usageTokens);
-  try {
-    return parsePolishResult(content);
-  } catch (err) {
-    // Truncated/garbled stream (e.g. connection dropped mid-JSON): surface an
-    // empty result rather than throwing away the whole polish — consistent
-    // with the matcher's drop-with-warn policy for unpinnable corrections.
-    console.warn("openai-compatible: failed to parse streamed content", err);
-    return { corrections: [] };
-  }
+  return parsePolishResult(content);
 }
 
 export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): Provider {

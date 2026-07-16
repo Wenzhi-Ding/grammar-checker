@@ -20,7 +20,10 @@ function mockStreamFetch(chunks: string[]) {
 
 describe("openai-compatible polishStream", () => {
   it("posts with stream:true + stream_options.include_usage", async () => {
-    const fetcher = mockStreamFetch(['data: {"choices":[{"delta":{"content":"a"}}]}\n\ndata: [DONE]\n\n']);
+    const fetcher = mockStreamFetch([
+      'data: {"choices":[{"delta":{"content":"{\\"corrections\\":[]}"}}]}\n\n',
+      "data: [DONE]\n\n",
+    ]);
     const provider = createOpenAICompatibleProvider({ id: "deepseek", fetchImpl: fetcher });
     await provider.polishStream!("hi", CONFIG, () => {});
     const body = JSON.parse((fetcher.mock.calls[0][1] as RequestInit).body as string);
@@ -70,5 +73,11 @@ describe("openai-compatible polishStream", () => {
     const provider = createOpenAICompatibleProvider({ id: "deepseek", fetchImpl: fetcher });
     await expect(provider.polishStream!("hi", CONFIG, () => {})).rejects.toMatchObject({ status: 401 });
     expect(fetcher).toHaveBeenCalledTimes(1);
+  });
+
+  it("throws when the accumulated stream content is not valid JSON", async () => {
+    const fetcher = mockStreamFetch(['data: {"choices":[{"delta":{"content":"a"}}]}\n\ndata: [DONE]\n\n']);
+    const provider = createOpenAICompatibleProvider({ id: "deepseek", fetchImpl: fetcher });
+    await expect(provider.polishStream!("hi", CONFIG, () => {})).rejects.toThrow(SyntaxError);
   });
 });
