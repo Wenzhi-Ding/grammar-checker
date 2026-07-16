@@ -5,8 +5,10 @@ import { Editor } from "@/components/Editor";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { SettingsPanel } from "@/components/SettingsPanel";
 import { ModelSelect } from "@/components/ModelSelect";
+import { TaskList } from "@/components/TaskList";
 import { CopyIcon, GitHubIcon } from "@/components/Icons";
 import { useSettings } from "@/hooks/useSettings";
+import { useTasks } from "@/hooks/useTasks";
 import { usePolish } from "@/hooks/usePolish";
 import { useLocale } from "@/hooks/useLocale";
 import { pinSpans } from "@/lib/providers/shared/match";
@@ -32,27 +34,26 @@ function findNextSuggestionId(
 export default function Home() {
   const MAX_CHARS = 50000;
   const { settings, update } = useSettings();
-  const { status, result, error, polish, reset } = usePolish();
+  const { tasks, enqueue, update: updateTask, remove: removeTask, markRead } = useTasks();
+  const { run, abort } = usePolish(updateTask);
   const locale = useLocale();
 
   const [text, setText] = useState("");
-  const [polishedText, setPolishedText] = useState("");
   const [suggestions, setSuggestions] = useState<PinnedCorrection[]>([]);
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [focusedTaskId, setFocusedTaskId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
   const [cardHeight, setCardHeight] = useState(0);
+  const [tasksOpen, setTasksOpen] = useState(false);
   const cardRef = useRef<HTMLDivElement>(null);
 
+  // Mirror focus into a ref so async completion callbacks read the latest value.
+  const focusedRef = useRef<string | null>(null);
   useEffect(() => {
-    if (status === "done" && result) {
-      // One-time derivation from async-arriving result — setState in effect is the
-      // canonical pattern here; the rule's "derive during render" guidance doesn't apply.
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSuggestions(pinSpans(polishedText, result.corrections));
-      setActiveId(null);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [result, status]);
+    focusedRef.current = focusedTaskId;
+  }, [focusedTaskId]);
+
+  const focused = tasks.find((t) => t.id === focusedTaskId) ?? null;
 
   // Resolve the effective provider+model: prefer the user's selection if it has a key
   // and a valid model; otherwise fall back to the first available configured model.
@@ -66,31 +67,77 @@ export default function Home() {
     return { provider: (cur ?? settings.providers[0]) as ProviderEntry, model: settings.selectedModel, options };
   }, [settings]);
 
-  const onPolish = useCallback(async () => {
-    setPolishedText(text);
-    setSuggestions([]);
-    setActiveId(null);
-    const reasonLanguage: "en" | "zh" =
-      settings.reasonLanguage === "auto"
-        ? typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("zh")
-          ? "zh"
-          : "en"
-        : settings.reasonLanguage;
-    const apiKey = effective.provider.apiKey;
-    const baseURL = effective.provider.baseURL || undefined;
-    await polish(text, {
-      providerId: effective.provider.id,
-      adapter: effective.provider.adapter,
-      config: {
-        apiKey,
-        model: effective.model,
-        baseURL,
-        language: settings.language,
-        reasonLanguage,
-        customInstructions: settings.customInstructions,
-      },
-    });
-  }, [text, settings, effective, polish]);
+  // Fire a new task for a snapshot. On completion: auto-load if still focused
+  // (the user is watching it), otherwise mark unread in the list.
+  const startTask = useCallback(
+    async (snapshot: string) => {
+      const reasonLanguage: "en" | "zh" =
+        settings.reasonLanguage === "auto"
+          ? typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("zh")
+            ? "zh"
+            : "en"
+          : settings.reasonLanguage;
+      const id = enqueue(snapshot, { providerId: effective.provider.id, model: effective.model });
+      setFocusedTaskId(id);
+      setSuggestions([]);
+      setActiveId(null);
+      const body = await run(id, snapshot, {
+        providerId: effective.provider.id,
+        adapter: effective.provider.adapter,
+        config: {
+          apiKey: effective.provider.apiKey,
+          model: effective.model,
+          baseURL: effective.provider.baseURL || undefined,
+          language: settings.language,
+          reasonLanguage,
+          customInstructions: settings.customInstructions,
+        },
+      });
+      if (!body) return;
+      if (focusedRef.current === id) {
+        // Editor text still equals the snapshot (any edit would have detached focus).
+        setSuggestions(pinSpans(snapshot, body.corrections));
+        setActiveId(null);
+      } else {
+        updateTask(id, { unread: true });
+      }
+    },
+    [settings, effective, enqueue, run, updateTask],
+  );
+
+  const onPolish = useCallback(() => {
+    void startTask(text);
+  }, [startTask, text]);
+
+  const handlePickTask = useCallback(
+    (id: string) => {
+      const t = tasks.find((x) => x.id === id);
+      if (!t) return;
+      setFocusedTaskId(id);
+      setText(t.text);
+      setActiveId(null);
+      if (t.status === "done") {
+        setSuggestions(pinSpans(t.text, t.result?.corrections ?? []));
+        if (t.unread) markRead(id);
+      } else {
+        setSuggestions([]);
+      }
+    },
+    [tasks, markRead],
+  );
+
+  const handleRemoveTask = useCallback(
+    (id: string) => {
+      abort(id);
+      removeTask(id);
+      if (focusedRef.current === id) {
+        setFocusedTaskId(null);
+        setSuggestions([]);
+        setActiveId(null);
+      }
+    },
+    [abort, removeTask],
+  );
 
   const handleAccept = useCallback(
     (id: string) => {
@@ -133,23 +180,23 @@ export default function Home() {
   const handleTextChange = useCallback(
     (t: string) => {
       setText(t);
-      // Manual edit invalidates pinned suggestions (offsets go stale); clear them so
-      // highlights don't misalign and accepts don't corrupt. User can re-polish.
-      if (suggestions.length > 0 || status === "done") {
+      // Manual edit invalidates pinned suggestions AND detaches from the focused
+      // task (a running task keeps going in the background and lands as unread).
+      if (suggestions.length > 0) {
         setSuggestions([]);
         setActiveId(null);
-        reset();
       }
+      if (focusedRef.current !== null) setFocusedTaskId(null);
     },
-    [suggestions.length, status, reset],
+    [suggestions.length],
   );
 
   const handleClear = useCallback(() => {
     setText("");
     setSuggestions([]);
     setActiveId(null);
-    reset();
-  }, [reset]);
+    setFocusedTaskId(null);
+  }, []);
 
   const copyResult = useCallback(async () => {
     await navigator.clipboard.writeText(text);
@@ -157,11 +204,17 @@ export default function Home() {
     setTimeout(() => setCopied(false), 1500);
   }, [text]);
 
+  // Retry = enqueue a NEW task with the failed/interrupted task's snapshot.
+  const retryFocused = useCallback(() => {
+    if (focused && (focused.status === "error" || focused.status === "interrupted")) {
+      void startTask(focused.text);
+    }
+  }, [focused, startTask]);
+
   const pendingCount = suggestions.filter((s) => s.state === "pending" && s.start >= 0).length;
   const unmatched = suggestions.filter((s) => s.matchTier === 3);
   const active = suggestions.find((s) => s.id === activeId) ?? null;
-  const inReview = status === "done";
-  const busy = status === "loading";
+  const inReview = focused?.status === "done";
 
   useEffect(() => {
     const el = cardRef.current;
@@ -186,6 +239,13 @@ export default function Home() {
   return (
     <>
       <header className="gp-topbar">
+        <button
+          className="gp-icon-btn gp-tasks-toggle"
+          title="任务列表"
+          onClick={() => setTasksOpen((v) => !v)}
+        >
+          ☰
+        </button>
         <div className="gp-logo">
           <span className="dot">Aa</span> Grammar Checker
         </div>
@@ -193,111 +253,137 @@ export default function Home() {
         <SettingsPanel settings={settings} update={update} />
       </header>
 
-      <main
-        className={active ? "gp-wrap card-active" : "gp-wrap"}
-        style={active ? ({ "--gp-card-height": `${cardHeight}px` } as React.CSSProperties) : undefined}
-      >
-        <div className="gp-card">
-          <Editor
-            text={text}
-            onChange={handleTextChange}
-            suggestions={suggestions}
-            readOnly={busy}
-            activeId={activeId}
-            onPick={setActiveId}
-            maxLength={MAX_CHARS}
+      <div className="gp-layout">
+        <div className={tasksOpen ? "gp-tasks-wrap open" : "gp-tasks-wrap"}>
+          <TaskList
+            tasks={tasks}
+            focusedId={focusedTaskId}
+            onPick={(id) => {
+              handlePickTask(id);
+              setTasksOpen(false);
+            }}
+            onRemove={handleRemoveTask}
           />
-          <div className="gp-toolbar">
-            <span className={text.length > MAX_CHARS ? "gp-count gp-count-over" : "gp-count"}>{text.length} / 50,000</span>
-            <div className="gp-acts">
+        </div>
+        {tasksOpen && <div className="gp-tasks-backdrop" onClick={() => setTasksOpen(false)} />}
+
+        <main
+          className={active ? "gp-wrap card-active" : "gp-wrap"}
+          style={active ? ({ "--gp-card-height": `${cardHeight}px` } as React.CSSProperties) : undefined}
+        >
+          <div className="gp-card">
+            <Editor
+              text={text}
+              onChange={handleTextChange}
+              suggestions={suggestions}
+              activeId={activeId}
+              onPick={setActiveId}
+              maxLength={MAX_CHARS}
+            />
+            <div className="gp-toolbar">
+              <span className={text.length > MAX_CHARS ? "gp-count gp-count-over" : "gp-count"}>{text.length} / 50,000</span>
+              <div className="gp-acts">
+                <button
+                  className="gp-icon-btn"
+                  title={copied ? "Copied!" : "Copy text"}
+                  disabled={!text}
+                  onClick={copyResult}
+                >
+                  {copied ? "✓" : <CopyIcon />}
+                </button>
+                <button
+                  className="gp-icon-btn"
+                  title="Clear"
+                  disabled={!text && suggestions.length === 0}
+                  onClick={handleClear}
+                >
+                  ✕
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="gp-actionrow">
+            <ModelSelect
+              providers={settings.providers}
+              providerId={effective.provider.id}
+              model={effective.model}
+              onChange={(pid, m) => update({ selectedProviderId: pid, selectedModel: m })}
+            />
+            <div className="gp-actionrow-btns">
+              {focused?.status === "running" && (
+                <span className="gp-progress">Polishing… ≈{focused.approxTokens} tokens</span>
+              )}
+              {inReview && (
+                <button
+                  className="gp-btn"
+                  onClick={handleAcceptAll}
+                  disabled={pendingCount === 0}
+                >
+                  Accept all ({pendingCount})
+                </button>
+              )}
               <button
-                className="gp-icon-btn"
-                title={copied ? "Copied!" : "Copy text"}
-                disabled={!text}
-                onClick={copyResult}
+                className="gp-btn gp-btn-primary"
+                onClick={onPolish}
+                disabled={!effective.provider.apiKey || !text || text.length > MAX_CHARS}
               >
-                {copied ? "✓" : <CopyIcon />}
-              </button>
-              <button
-                className="gp-icon-btn"
-                title="Clear"
-                disabled={!text && suggestions.length === 0}
-                onClick={handleClear}
-              >
-                ✕
+                Polish
               </button>
             </div>
           </div>
-        </div>
 
-        <div className="gp-actionrow">
-          <ModelSelect
-            providers={settings.providers}
-            providerId={effective.provider.id}
-            model={effective.model}
-            onChange={(pid, m) => update({ selectedProviderId: pid, selectedModel: m })}
-          />
-          <div className="gp-actionrow-btns">
-            {inReview && (
-              <button
-                className="gp-btn"
-                onClick={handleAcceptAll}
-                disabled={pendingCount === 0}
-              >
-                Accept all ({pendingCount})
+          {focused?.status === "error" && focused.error && (
+            <div className="gp-panel gp-panel-error">
+              {focused.error.message}
+              {focused.error.retryable && (
+                <button onClick={retryFocused} style={{ marginLeft: 8, background: "none", border: "none", color: "var(--gp-blue)", cursor: "pointer", textDecoration: "underline" }}>
+                  重试
+                </button>
+              )}
+            </div>
+          )}
+
+          {focused?.status === "interrupted" && (
+            <div className="gp-panel gp-panel-empty">
+              任务已中断（页面刷新或关闭）。
+              <button onClick={retryFocused} style={{ marginLeft: 8, background: "none", border: "none", color: "var(--gp-blue)", cursor: "pointer", textDecoration: "underline" }}>
+                重新 polish
               </button>
-            )}
-            <button
-              className="gp-btn gp-btn-primary"
-              onClick={onPolish}
-              disabled={busy || !effective.provider.apiKey || !text || text.length > MAX_CHARS}
-            >
-              {busy ? "Polishing…" : "Polish"}
-            </button>
-          </div>
-        </div>
+            </div>
+          )}
 
-        {error && (
-          <div className="gp-panel gp-panel-error">
-            {error.message}
-            {error.retryable && (
-              <button onClick={onPolish} style={{ marginLeft: 8, background: "none", border: "none", color: "var(--gp-blue)", cursor: "pointer", textDecoration: "underline" }}>
-                重试
-              </button>
-            )}
-          </div>
-        )}
+          {focused?.status === "done" && focused.result && focused.result.corrections.length === 0 && (
+            <div className="gp-panel gp-panel-empty">未发现可润色之处。</div>
+          )}
 
-        {inReview && result && result.corrections.length === 0 && (
-          <div className="gp-panel gp-panel-empty">未发现可润色之处。</div>
-        )}
+          {active && (
+            <div ref={cardRef}>
+              <SuggestionCard suggestion={active} onAccept={handleAccept} onReject={handleReject} />
+            </div>
+          )}
 
-        {active && (
-          <div ref={cardRef}>
-            <SuggestionCard suggestion={active} onAccept={handleAccept} onReject={handleReject} />
-          </div>
-        )}
-
-        {unmatched.length > 0 && (
-          <details className="gp-panel gp-panel-unmatched">
-            <summary>{unmatched.length} 条无法定位（仅参考）</summary>
-            <ul style={{ marginTop: 8, lineHeight: 1.8 }}>
-              {unmatched.map((u) => (
-                <li key={u.id}>
-                  <span style={{ color: "var(--gp-red-text)" }}>{u.original}</span>
-                  {u.suggestion && (
-                    <>
-                      {" → "}
-                      <span style={{ color: "var(--gp-green)" }}>{u.suggestion}</span>
-                    </>
-                  )}
-                  <span style={{ color: "var(--gp-sub)" }}> — {u.reason}</span>
-                </li>
-              ))}
-            </ul>
-          </details>
-        )}
-      </main>
+          {unmatched.length > 0 && (
+            <details className="gp-panel gp-panel-unmatched">
+              <summary>{unmatched.length} 条无法定位（仅参考）</summary>
+              <ul style={{ marginTop: 8, lineHeight: 1.8 }}>
+                {unmatched.map((u) => (
+                  <li key={u.id}>
+                    <span style={{ color: "var(--gp-red-text)" }}>{u.original}</span>
+                    {u.suggestion && (
+                      <>
+                        {" → "}
+                        <span style={{ color: "var(--gp-green)" }}>{u.suggestion}</span>
+                      </>
+                    )}
+                    <span style={{ color: "var(--gp-sub)" }}> — {u.reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )}
+        </main>
+      </div>
 
       <footer className="gp-footer">
         <p className="gp-footer-line">

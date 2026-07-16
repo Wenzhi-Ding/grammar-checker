@@ -8,13 +8,12 @@ interface EditorProps {
   text: string;
   onChange: (t: string) => void;
   suggestions: PinnedCorrection[];
-  readOnly: boolean;
   activeId: string | null;
   onPick: (id: string | null) => void;
   maxLength?: number;
 }
 
-export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick, maxLength }: EditorProps) {
+export function Editor({ text, onChange, suggestions, activeId, onPick, maxLength }: EditorProps) {
   const taRef = useRef<HTMLTextAreaElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
 
@@ -60,7 +59,6 @@ export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick
         ref={taRef}
         className="gp-textarea"
         value={text}
-        readOnly={readOnly}
         spellCheck={false}
         maxLength={maxLength}
         placeholder="Paste or type your text here…"

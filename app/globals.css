@@ -217,3 +217,62 @@ body {
 .gp-key-note {
   margin: 6px 0 0; font-size: 11px; line-height: 1.5; color: var(--gp-sub);
 }
+
+/* ---- task queue layout (sidebar + main) ---- */
+.gp-layout {
+  display: flex; gap: 24px; align-items: flex-start;
+  max-width: 1120px; margin: 40px auto 80px; padding: 0 20px;
+}
+.gp-layout .gp-wrap { flex: 1; min-width: 0; max-width: none; margin: 0; padding: 0; }
+.gp-tasks-wrap { width: 280px; flex-shrink: 0; position: sticky; top: 88px; }
+.gp-tasks {
+  background: #fff; border: 1px solid var(--gp-line); border-radius: 12px;
+  box-shadow: var(--gp-shadow); overflow: hidden;
+}
+.gp-tasks-title { padding: 12px 16px; font-size: 13px; font-weight: 600; color: var(--gp-sub); border-bottom: 1px solid var(--gp-line); }
+.gp-tasks-empty { padding: 24px 16px; font-size: 13px; color: var(--gp-sub); text-align: center; }
+.gp-tasks-list { list-style: none; margin: 0; padding: 0; max-height: calc(100vh - 200px); overflow-y: auto; }
+.gp-tasks-list li { position: relative; border-bottom: 1px solid var(--gp-line); }
+.gp-tasks-list li:last-child { border-bottom: none; }
+.gp-task {
+  display: block; width: 100%; text-align: left; border: none; background: transparent;
+  cursor: pointer; padding: 10px 36px 10px 14px; font-family: inherit;
+}
+.gp-task:hover { background: var(--gp-blue-soft); }
+.gp-task-focused { background: var(--gp-blue-soft); box-shadow: inset 2px 0 0 var(--gp-blue); }
+.gp-task-top { display: flex; align-items: center; gap: 6px; }
+.gp-task-snippet { font-size: 13px; color: var(--gp-text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-task-unread .gp-task-snippet { font-weight: 600; }
+.gp-task-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--gp-blue); flex-shrink: 0; }
+.gp-task-meta { display: flex; align-items: center; gap: 8px; margin-top: 4px; font-size: 11px; color: var(--gp-sub); }
+.gp-task-status-running { color: var(--gp-blue); }
+.gp-task-status-running::before {
+  content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 4px;
+  border: 2px solid var(--gp-blue); border-top-color: transparent; border-radius: 50%;
+  animation: gp-spin 0.8s linear infinite; vertical-align: -1px;
+}
+@keyframes gp-spin { to { transform: rotate(360deg); } }
+.gp-task-status-error { color: var(--gp-red-text); }
+.gp-task-model { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.gp-task-time { margin-left: auto; flex-shrink: 0; }
+.gp-task-remove {
+  position: absolute; top: 8px; right: 8px; width: 24px; height: 24px;
+  border: none; border-radius: 50%; background: transparent; color: var(--gp-sub);
+  cursor: pointer; font-size: 14px; line-height: 1;
+}
+.gp-task-remove:hover { background: rgba(60, 64, 67, 0.08); color: var(--gp-red-text); }
+.gp-progress { font-size: 13px; color: var(--gp-sub); align-self: center; }
+.gp-tasks-toggle { display: none; }
+.gp-tasks-backdrop { display: none; }
+
+@media (max-width: 899px) {
+  .gp-tasks-toggle { display: flex; }
+  .gp-tasks-wrap {
+    position: fixed; left: 0; top: 64px; bottom: 0; z-index: 45; width: 300px;
+    transform: translateX(-100%); transition: transform 0.2s; background: var(--gp-bg);
+  }
+  .gp-tasks-wrap.open { transform: translateX(0); box-shadow: var(--gp-shadow-pop); }
+  .gp-tasks { border-radius: 0; height: 100%; }
+  .gp-tasks-backdrop { display: block; position: fixed; inset: 64px 0 0 0; z-index: 44; background: rgba(0, 0, 0, 0.3); }
+  .gp-layout { gap: 0; }
+}
