@@ -11,6 +11,8 @@ export interface Settings {
   language: "en" | "zh" | "auto";
   /** Language the LLM writes `reason` in. "auto" = browser language. */
   reasonLanguage: "en" | "zh" | "auto";
+  /** User extra instructions appended to the system prompt (hard rules always remain). */
+  customInstructions: string;
 }
 
 const STORAGE_KEY = "grammar-polisher.settings.v8";
@@ -30,6 +32,7 @@ const DEFAULTS: Settings = {
   selectedModel: "deepseek-v4-pro",
   language: "auto",
   reasonLanguage: "auto",
+  customInstructions: "",
 };
 
 /** Migrate from older storage: use FRESH builtin seeds (new model lists + new builtins),

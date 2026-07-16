@@ -85,6 +85,7 @@ export default function Home() {
         baseURL,
         language: settings.language,
         reasonLanguage,
+        customInstructions: settings.customInstructions,
       },
     });
   }, [text, settings, effective, polish]);

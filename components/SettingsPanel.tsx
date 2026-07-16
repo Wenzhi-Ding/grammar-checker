@@ -136,6 +136,14 @@ export function SettingsPanel({ settings, update }: Props) {
             <option value="en">English</option>
             <option value="zh">中文</option>
           </select>
+
+          <label className="gp-field-label">Custom instructions (appended to the prompt)</label>
+          <textarea
+            className="gp-input gp-models-area"
+            placeholder="e.g. Prefer a formal tone; always keep contractions."
+            value={settings.customInstructions}
+            onChange={(e) => update({ customInstructions: e.target.value })}
+          />
         </div>
       )}
     </div>
