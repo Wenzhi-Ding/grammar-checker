@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { Editor } from "@/components/Editor";
 import { SuggestionCard } from "@/components/SuggestionCard";
 import { SettingsPanel } from "@/components/SettingsPanel";
+import { ModelSelect } from "@/components/ModelSelect";
 import { useSettings } from "@/hooks/useSettings";
 import { usePolish } from "@/hooks/usePolish";
 import { pinSpans } from "@/lib/providers/shared/match";
@@ -33,6 +34,8 @@ export default function Home() {
 
   const onPolish = useCallback(async () => {
     setPolishedText(text);
+    setSuggestions([]);
+    setActiveId(null);
     const reasonLanguage: "en" | "zh" =
       settings.reasonLanguage === "auto"
         ? typeof navigator !== "undefined" && navigator.language?.toLowerCase().startsWith("zh")
@@ -129,11 +132,11 @@ export default function Home() {
             <div className="gp-acts">
               <button
                 className="gp-icon-btn"
-                title="Copy text"
+                title={copied ? "Copied!" : "Copy text"}
                 disabled={!text}
                 onClick={copyResult}
               >
-                📋
+                {copied ? "✓" : "📋"}
               </button>
               <button
                 className="gp-icon-btn"
@@ -148,23 +151,21 @@ export default function Home() {
         </div>
 
         <div className="gp-actionrow">
-          {inReview ? (
-            <>
-              <button className="gp-btn" onClick={handleClear}>
-                Clear
-              </button>
-              <button className="gp-btn" onClick={copyResult}>
-                {copied ? "Copied!" : "Copy result"}
-              </button>
+          <ModelSelect
+            presetId={settings.presetId}
+            model={settings.model}
+            onChange={(m) => update({ model: m })}
+          />
+          <div className="gp-actionrow-btns">
+            {inReview && (
               <button
-                className="gp-btn gp-btn-primary"
+                className="gp-btn"
                 onClick={handleAcceptAll}
                 disabled={pendingCount === 0}
               >
                 Accept all ({pendingCount})
               </button>
-            </>
-          ) : (
+            )}
             <button
               className="gp-btn gp-btn-primary"
               onClick={onPolish}
@@ -172,7 +173,7 @@ export default function Home() {
             >
               {busy ? "Polishing…" : "Polish"}
             </button>
-          )}
+          </div>
         </div>
 
         {error && (

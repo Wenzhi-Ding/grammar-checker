@@ -41,6 +41,15 @@ export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick
     };
   }, []);
 
+  // Auto-grow the textarea to fit content (Google Translate style),
+  // capped by CSS max-height (viewport-bounded); past the cap it scrolls internally.
+  useEffect(() => {
+    const ta = taRef.current;
+    if (!ta) return;
+    ta.style.height = "auto";
+    ta.style.height = `${ta.scrollHeight}px`;
+  }, [text]);
+
   return (
     <div className="gp-editor-wrap">
       <div

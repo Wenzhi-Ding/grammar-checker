@@ -80,7 +80,9 @@ body {
   white-space: pre-wrap; overflow-wrap: break-word; color: var(--gp-text);
 }
 .gp-textarea {
-  position: relative; width: 100%; min-height: 160px; resize: vertical; background: transparent;
+  position: relative; width: 100%; min-height: 120px;
+  max-height: calc(100vh - 300px); /* never exceed viewport — leave room for chrome */
+  resize: none; overflow-y: auto; background: transparent;
   color: transparent; caret-color: var(--gp-blue); outline: none;
   padding: 20px 24px; font-size: 20px; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: break-word;
@@ -113,7 +115,17 @@ body {
 .gp-btn-primary { background: var(--gp-blue); color: #fff; border-color: var(--gp-blue); }
 .gp-btn-primary:hover { background: var(--gp-blue-h); box-shadow: 0 1px 3px rgba(26, 115, 248, 0.4); }
 .gp-btn-primary:disabled:hover { background: var(--gp-blue); box-shadow: none; }
-.gp-actionrow { display: flex; justify-content: flex-end; margin-top: 16px; gap: 10px; }
+.gp-actionrow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 16px; }
+.gp-actionrow-btns { display: flex; gap: 10px; }
+
+/* ---- model selector (bottom bar) ---- */
+.gp-modelselect { display: flex; align-items: center; gap: 8px; }
+.gp-modelselect-label { font-size: 12px; color: var(--gp-sub); font-weight: 500; }
+.gp-modelselect-input {
+  border: 1px solid var(--gp-line); border-radius: 8px; padding: 7px 10px; font-size: 13px;
+  font-family: inherit; color: var(--gp-text); background: #fff; min-width: 190px;
+}
+.gp-modelselect-input:focus { border-color: var(--gp-blue); outline: none; box-shadow: 0 0 0 2px rgba(26, 115, 248, 0.15); }
 
 /* ---- suggestion popover (centered) ---- */
 .gp-suggest {
