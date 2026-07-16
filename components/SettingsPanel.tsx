@@ -135,15 +135,6 @@ export function SettingsPanel({ settings, update }: Props) {
             <option value="en">English</option>
             <option value="zh">中文</option>
           </select>
-
-          <label className="gp-checkbox-row">
-            <input
-              type="checkbox"
-              checked={settings.rememberKey}
-              onChange={(e) => update({ rememberKey: e.target.checked })}
-            />
-            记住 Keys（存到本机 localStorage）
-          </label>
         </div>
       )}
     </div>

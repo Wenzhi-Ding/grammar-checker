@@ -52,18 +52,12 @@ export function Editor({ text, onChange, suggestions, readOnly, activeId, onPick
 
   return (
     <div className="gp-editor-wrap">
-      <div
-        ref={overlayRef}
-        className="gp-overlay"
-        style={{ pointerEvents: readOnly ? "auto" : "none" }}
-        aria-hidden
-      >
+      <div ref={overlayRef} className="gp-overlay" aria-hidden>
         <HighlightOverlay text={text} suggestions={suggestions} activeId={activeId} onPick={onPick} />
       </div>
       <textarea
         ref={taRef}
         className="gp-textarea"
-        style={readOnly ? { pointerEvents: "none" } : undefined}
         value={text}
         readOnly={readOnly}
         spellCheck={false}

@@ -11,11 +11,10 @@ export interface Settings {
   language: "en" | "zh" | "auto";
   /** Language the LLM writes `reason` in. "auto" = browser language. */
   reasonLanguage: "en" | "zh" | "auto";
-  rememberKey: boolean;
 }
 
 const STORAGE_KEY = "grammar-polisher.settings.v3";
-const STORAGE_KEY_NOSECRET = "grammar-polisher.settings.v3.nosecret";
+const LEGACY_NOSECRET = "grammar-polisher.settings.v3.nosecret";
 
 const DEFAULTS: Settings = {
   providers: defaultProviders(),
@@ -23,26 +22,19 @@ const DEFAULTS: Settings = {
   selectedModel: "deepseek-v4-pro",
   language: "auto",
   reasonLanguage: "auto",
-  rememberKey: false,
 };
-
-function stripKeys(providers: ProviderEntry[]): ProviderEntry[] {
-  return providers.map((p) => ({ ...p, apiKey: "" }));
-}
 
 function load(): Settings {
   if (typeof window === "undefined") return DEFAULTS;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(STORAGE_KEY_NOSECRET);
+    const raw = window.localStorage.getItem(STORAGE_KEY) ?? window.localStorage.getItem(LEGACY_NOSECRET);
     if (!raw) return DEFAULTS;
     const parsed = JSON.parse(raw) as Partial<Settings>;
-    const base: Settings = {
+    return {
       ...DEFAULTS,
       ...parsed,
       providers: mergeProviders(parsed.providers ?? defaultProviders()),
     };
-    if (!base.rememberKey) base.providers = stripKeys(base.providers);
-    return base;
   } catch {
     return DEFAULTS;
   }
@@ -62,14 +54,8 @@ export function useSettings() {
     setSettings((prev) => {
       const next: Settings = { ...prev, ...patch };
       try {
-        if (next.rememberKey) {
-          window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-          window.localStorage.removeItem(STORAGE_KEY_NOSECRET);
-        } else {
-          window.localStorage.removeItem(STORAGE_KEY);
-          const safe = { ...next, providers: stripKeys(next.providers) };
-          window.localStorage.setItem(STORAGE_KEY_NOSECRET, JSON.stringify(safe));
-        }
+        // Keys are always persisted to localStorage (per user request).
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
       } catch {
         /* ignore quota errors */
       }

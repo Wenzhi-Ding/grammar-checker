@@ -102,7 +102,22 @@ export default function Home() {
       setText(t);
       return sugs;
     });
+    setActiveId(null);
   }, [text]);
+
+  const handleTextChange = useCallback(
+    (t: string) => {
+      setText(t);
+      // Manual edit invalidates pinned suggestions (offsets go stale); clear them so
+      // highlights don't misalign and accepts don't corrupt. User can re-polish.
+      if (suggestions.length > 0 || status === "done") {
+        setSuggestions([]);
+        setActiveId(null);
+        reset();
+      }
+    },
+    [suggestions.length, status, reset],
+  );
 
   const handleClear = useCallback(() => {
     setText("");
@@ -137,9 +152,9 @@ export default function Home() {
         <div className="gp-card">
           <Editor
             text={text}
-            onChange={setText}
+            onChange={handleTextChange}
             suggestions={suggestions}
-            readOnly={inReview || busy}
+            readOnly={busy}
             activeId={activeId}
             onPick={setActiveId}
           />

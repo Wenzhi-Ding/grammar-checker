@@ -75,12 +75,12 @@ body {
 }
 .gp-editor-wrap { position: relative; width: 100%; }
 .gp-overlay {
-  position: absolute; inset: 0; overflow: auto; pointer-events: none;
+  position: absolute; inset: 0; z-index: 2; overflow: auto; pointer-events: none;
   padding: 20px 24px; font-size: 20px; line-height: 1.6;
   white-space: pre-wrap; overflow-wrap: break-word; color: var(--gp-text);
 }
 .gp-textarea {
-  position: relative; width: 100%; min-height: 120px;
+  position: relative; z-index: 1; width: 100%; min-height: 120px;
   max-height: calc(100vh - 300px); /* never exceed viewport — leave room for chrome */
   resize: none; overflow-y: auto; background: transparent;
   color: transparent; caret-color: var(--gp-blue); outline: none;
