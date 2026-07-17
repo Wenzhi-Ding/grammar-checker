@@ -29,7 +29,7 @@ const LEGACY_KEYS = [
 const DEFAULTS: Settings = {
   providers: defaultProviders(),
   selectedProviderId: "deepseek",
-  selectedModel: "deepseek-v4-pro",
+  selectedModel: "deepseek-v4-flash",
   language: "auto",
   reasonLanguage: "auto",
   customInstructions: "",
