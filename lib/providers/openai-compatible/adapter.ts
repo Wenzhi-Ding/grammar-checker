@@ -2,7 +2,7 @@ import type { Provider, ProviderConfig, PolishResult } from "../shared/schema";
 import { detect } from "../shared/lang";
 import { assembleSystem, assembleUser } from "../shared/prompt";
 import { parsePolishResult } from "../shared/parse";
-import { callStreamWithFallback } from "../shared/http";
+import { callStreamWithFallback, toHttpError } from "../shared/http";
 import { iterateSSE } from "../shared/sse";
 import { ENGLISH_FRAMING } from "./prompt/en";
 import { CHINESE_FRAMING } from "./prompt/zh";
@@ -89,11 +89,7 @@ export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): 
     async polish(text: string, config: ProviderConfig): Promise<PolishResult> {
       const { url, init } = buildChatRequest(text, config, false);
       const res = await fetchFn(url, init);
-      if (!res.ok) {
-        const err = new Error(`provider ${id} returned ${res.status}`) as Error & { status: number };
-        err.status = res.status;
-        throw err;
-      }
+      if (!res.ok) throw await toHttpError(`provider ${id}`, res);
       const data = await res.json();
       const content: string = data.choices?.[0]?.message?.content ?? "";
       return parsePolishResult(content);
@@ -106,11 +102,7 @@ export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): 
         { proxyBody: { providerId: id, adapter: "openai-compatible", payload: { text, config } }, signal },
         (u, i) => fetchFn(u, i),
       );
-      if (!res.ok) {
-        const err = new Error(`provider ${id} returned ${res.status}`) as Error & { status: number };
-        err.status = res.status;
-        throw err;
-      }
+      if (!res.ok) throw await toHttpError(`provider ${id}`, res);
       return readChatStream(res, onToken);
     },
   };

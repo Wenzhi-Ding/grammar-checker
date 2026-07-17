@@ -9,6 +9,22 @@ export interface ProxyBody {
 }
 
 /**
+ * Build an Error for a non-OK upstream response. Embeds a truncated body
+ * excerpt (the provider's own error detail, e.g. "Insufficient Balance") so
+ * the UI can show more than a bare status code. `.status` is always set for
+ * toPolishError classification. Tolerates mock Responses lacking .text().
+ */
+export async function toHttpError(prefix: string, res: Response): Promise<Error & { status: number }> {
+  const detail = typeof res.text === "function" ? await res.text().catch(() => "") : "";
+  const excerpt = detail.trim().slice(0, 300);
+  const err = new Error(excerpt ? `${prefix}: ${excerpt}` : `${prefix} returned ${res.status}`) as Error & {
+    status: number;
+  };
+  err.status = res.status;
+  return err;
+}
+
+/**
  * Run `direct()`. On a TypeError (browser CORS/network opaque failure — distinct
  * from an HTTP status), retry once through the stateless /api/polish route.
  * `proxyFetch` is injectable for tests; defaults to global fetch. It must return
@@ -30,10 +46,13 @@ export async function callWithFallback<T = unknown>(
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(opts.proxyBody),
     });
-    const body = (await res.json()) as T & { error?: string };
+    const body = (await res.json()) as T & { error?: string; kind?: string };
     if (!res.ok) {
-      const err = new Error(body.error ?? `proxy returned ${res.status}`) as Error & { status: number };
+      const err = new Error(body.error ?? `proxy returned ${res.status}`) as Error & { status: number; kind?: string };
       err.status = res.status;
+      // The proxy tags server-side parse failures with kind: "schema" — preserve
+      // it so toPolishError classifies them the same as client-side ones.
+      if (body.kind) err.kind = body.kind;
       throw err;
     }
     return { ok: true, status: res.status, body };

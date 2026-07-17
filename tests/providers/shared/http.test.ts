@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { callWithFallback } from "@/lib/providers/shared/http";
+import { callWithFallback, toHttpError } from "@/lib/providers/shared/http";
 
 beforeEach(() => {
   vi.restoreAllMocks();
@@ -47,5 +47,40 @@ describe("callWithFallback", () => {
     await expect(
       callWithFallback(direct, { proxyBody: { provider: "x", payload: {} } }, proxyFetch),
     ).rejects.toMatchObject({ status: 401, message: "Invalid API key" });
+  });
+
+  it("propagates kind from the proxy error body", async () => {
+    const direct = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const proxyFetch = vi.fn().mockResolvedValue({
+      ok: false,
+      status: 422,
+      json: async () => ({ error: "model output is not valid structured JSON", kind: "schema" }),
+    });
+    await expect(
+      callWithFallback(direct, { proxyBody: { provider: "x", payload: {} } }, proxyFetch),
+    ).rejects.toMatchObject({ status: 422, kind: "schema" });
+  });
+});
+
+describe("toHttpError", () => {
+  it("embeds a truncated body excerpt and sets .status", async () => {
+    const res = new Response('{"error":{"message":"Insufficient Balance"}}', { status: 402 });
+    const err = await toHttpError("provider deepseek", res);
+    expect(err.status).toBe(402);
+    expect(err.message).toContain("provider deepseek");
+    expect(err.message).toContain("Insufficient Balance");
+  });
+
+  it("truncates very long bodies", async () => {
+    const res = new Response("x".repeat(1000), { status: 500 });
+    const err = await toHttpError("gemini", res);
+    expect(err.message.length).toBeLessThanOrEqual("gemini: ".length + 300);
+  });
+
+  it("falls back to a bare status message when the body is unreadable", async () => {
+    const res = { status: 503 } as unknown as Response; // no .text()
+    const err = await toHttpError("provider kimi", res);
+    expect(err.status).toBe(503);
+    expect(err.message).toBe("provider kimi returned 503");
   });
 });

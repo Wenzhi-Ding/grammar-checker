@@ -4,6 +4,7 @@ import { createGeminiProvider, buildStreamRequest as buildGeminiStreamRequest } 
 import { createOpenAICompatibleProvider, buildStreamRequest as buildOpenAIStreamRequest } from "@/lib/providers/openai-compatible/adapter";
 import type { ProviderConfig } from "@/lib/providers/shared/schema";
 import type { AdapterKind } from "@/lib/providers/shared/presets";
+import { PolishParseError } from "@/lib/providers/shared/parse";
 
 export const runtime = "nodejs";
 // Stateless: no caching, no persistence.
@@ -71,9 +72,12 @@ export async function POST(req: NextRequest) {
     const result = await impl.polish(payload.text, payload.config);
     return NextResponse.json(result);
   } catch (err) {
-    const status = (err as Error & { status?: number }).status ?? 500;
+    // Parse failures get kind:"schema" so the client classifies them the same
+    // as client-side parse failures (format issue — retry / stronger model).
+    const isParse = err instanceof PolishParseError;
+    const status = (err as Error & { status?: number }).status ?? (isParse ? 422 : 500);
     const message = err instanceof Error ? err.message : "proxy polish failed";
     // SECURITY: never include the apiKey in the response or logs.
-    return NextResponse.json({ error: message }, { status });
+    return NextResponse.json({ error: message, ...(isParse ? { kind: "schema" } : {}) }, { status });
   }
 }

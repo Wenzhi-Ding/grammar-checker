@@ -1,6 +1,7 @@
 // tests/providers/openai-compatible/stream.test.ts
 import { describe, it, expect, vi } from "vitest";
 import { createOpenAICompatibleProvider } from "@/lib/providers/openai-compatible/adapter";
+import { PolishParseError } from "@/lib/providers/shared/parse";
 
 function streamOf(chunks: string[]): ReadableStream<Uint8Array> {
   const enc = new TextEncoder();
@@ -78,7 +79,7 @@ describe("openai-compatible polishStream", () => {
   it("throws when the accumulated stream content is not valid JSON", async () => {
     const fetcher = mockStreamFetch(['data: {"choices":[{"delta":{"content":"a"}}]}\n\ndata: [DONE]\n\n']);
     const provider = createOpenAICompatibleProvider({ id: "deepseek", fetchImpl: fetcher });
-    await expect(provider.polishStream!("hi", CONFIG, () => {})).rejects.toThrow(SyntaxError);
+    await expect(provider.polishStream!("hi", CONFIG, () => {})).rejects.toThrow(PolishParseError);
   });
 
   it("aborts without proxy retry when the signal fires pre-stream", async () => {

@@ -1,42 +1,38 @@
 # Grammar Checker
 
-A Vercel-deployed, **bring-your-own-key** (BYOK) Grammarly-style grammar/text checker. Paste text → click **Polish** → see inline, per-span suggestions with reasons; accept/reject each or accept all.
+A Grammarly-style grammar and text polisher. Paste text → click **Polish** → get inline, per-span suggestions with reasons; accept or reject each one, or accept all.
 
-Supported providers (you supply the API key): **DeepSeek**, **Kimi (Moonshot)**, **GLM (智谱)**, **Gemini**, and any **OpenAI-compatible** custom endpoint.
+**Bring your own key (BYOK):** you supply the LLM API key. It never leaves your browser.
 
-## Setup
+Recommended: **DeepSeek `deepseek-v4-flash`** — quality is more than good enough for polishing, it's fast, and a single polish costs less than ¥0.05 (~$0.01).
+
+## Features
+
+- Inline highlights pinned to exact spans, with one-line reasons per suggestion
+- Accept / reject individual suggestions, or accept all and copy the result
+- Task queue: run multiple polishes in parallel, switch between them in the sidebar
+- English and Chinese support
+- Supported providers: **DeepSeek**, **Kimi (Moonshot)**, **GLM (智谱)**, **Gemini**, plus any **OpenAI-compatible** custom endpoint
+- No accounts, no server-side storage — your text and key stay on your machine
+
+## Getting Started
 
 ```bash
 npm install
 npm run dev     # http://localhost:3000
 ```
 
-Open the app, click ⚙️, pick a provider, paste your API key, (optionally) tune the model. The key is stored in your browser only — check "Remember key" to persist it to `localStorage`; otherwise it lives in memory for the session.
+Open the app, click ⚙️, pick a provider, and paste your API key. The key is stored in your browser only.
 
-## How to verify
+## Deployment
 
-Automated gate (run before commit):
+Optimized for [Vercel](https://vercel.com): push the repo and import it — no environment variables or server config required.
+
+## Development
 
 ```bash
-npm run lint && npm run typecheck && npm test && npm run build
+npm run lint        # eslint
+npm run typecheck   # tsc --noEmit
+npm test            # vitest
+npm run build       # production build
 ```
-
-Manual smoke tests (need real API keys + `npm run dev`):
-
-1. **English** — configure DeepSeek/GLM/Gemini. Paste:
-   `She dont know what your doing, becouse the team have went home.`
-   Expect several highlights; accept one (text updates), **Accept all**, **Copy result**.
-2. **Chinese** — paste: `这个方案我觉得吧，可能会有一些潜在的风险存在，我们需要进一步的来进行讨论。`
-   Expect style/clarity/word-choice suggestions (中文润色 prompt focuses there).
-3. **Kimi proxy fallback** — configure a Kimi key, polish any text. In DevTools Network you should see a failed direct call to `api.moonshot.cn` (CORS-blocked) followed by a successful `/api/polish` call — the stateless proxy re-runs the polish server-side. Results render normally.
-
-## Architecture
-
-- **Provider layer**: one `Provider` interface, two adapters (`openai-compatible`, `gemini`) + a preset registry. Adding an OpenAI-compatible provider = one config line.
-- **Matching engine** (`lib/providers/shared/match.ts`): pins each LLM correction to a span via exact `indexOf` → diff-match-patch fuzzy → drop (with a similarity guardrail — a wrong pin is worse than no pin).
-- **CORS self-heal**: all providers default to direct browser calls; on a network/CORS `TypeError`, automatically retry once through the stateless `/api/polish` route (key in body, nothing logged/cached).
-- **Full design**: [`docs/superpowers/specs/2026-07-15-grammar-polisher-design.md`](docs/superpowers/specs/2026-07-15-grammar-polisher-design.md)
-
-## Tech
-
-Next.js 16 (App Router) · TypeScript (strict) · Vitest · zod · diff-match-patch

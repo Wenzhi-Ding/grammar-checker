@@ -2,7 +2,7 @@ import type { Provider, ProviderConfig, PolishResult } from "../shared/schema";
 import { detect } from "../shared/lang";
 import { assembleSystem, assembleUser, CORRECTION_TYPES } from "../shared/prompt";
 import { parsePolishResult } from "../shared/parse";
-import { callStreamWithFallback } from "../shared/http";
+import { callStreamWithFallback, toHttpError } from "../shared/http";
 import { iterateSSE } from "../shared/sse";
 import { ENGLISH_FRAMING } from "./prompt/en";
 import { CHINESE_FRAMING } from "./prompt/zh";
@@ -107,11 +107,7 @@ export function createGeminiProvider({ fetchImpl }: AdapterOpts = {}): Provider 
         headers: { "Content-Type": "application/json" },
         body: buildBody(text, config),
       });
-      if (!res.ok) {
-        const err = new Error(`gemini returned ${res.status}`) as Error & { status: number };
-        err.status = res.status;
-        throw err;
-      }
+      if (!res.ok) throw await toHttpError("gemini", res);
       const data = await res.json();
       const content: string = data.candidates?.[0]?.content?.parts?.[0]?.text ?? "";
       return parsePolishResult(content);
@@ -124,11 +120,7 @@ export function createGeminiProvider({ fetchImpl }: AdapterOpts = {}): Provider 
         { proxyBody: { providerId: "gemini", adapter: "gemini", payload: { text, config } }, signal },
         (u, i) => fetchFn(u, i),
       );
-      if (!res.ok) {
-        const err = new Error(`gemini returned ${res.status}`) as Error & { status: number };
-        err.status = res.status;
-        throw err;
-      }
+      if (!res.ok) throw await toHttpError("gemini", res);
       return readGeminiStream(res, onToken);
     },
   };
