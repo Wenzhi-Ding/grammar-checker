@@ -36,6 +36,14 @@ CRITICAL for these fixes: "original" MUST contain the LITERAL newline ("\\n") ex
 
 return original = "is\\nbroken mid-way" (with a literal "\\n") and suggestion = "is broken mid-way". Do NOT replace the newline with a space inside "original", or the frontend's substring match will fail and the fix will be dropped.`;
 
+/** Markup / formula preservation rule — LaTeX and Markdown markers must survive correction. */
+export const MARKUP_PRESERVATION_RULE = `MARKUP / FORMULA PRESERVATION — the input may contain LaTeX (e.g. "$...$", "$$...$$", "\\(...\\)", "\\[...\\]", "\\alpha", "\\beta", "\\cite{smith2020}", "\\ref{fig1}", "\\section{Intro}", "\\textbf{...}", "\\begin{equation}...\\end{equation}") or Markdown syntax (e.g. "**bold**", "*italic*", "_underline_", "# headings", "[link](url)", \`inline code\`, \`\`\`code blocks\`\`\`, "> blockquote", list markers "-", "*", "1."). You MUST preserve every such marker verbatim:
+- Do NOT rewrite, "fix", expand, or translate LaTeX commands, math environments, citation keys, label names, or Macro names. "\\cite{smith2020}" stays "\\cite{smith2020}"; "$x = y$" stays "$x = y$".
+- Do NOT strip, add, or alter Markdown marker characters. "**important**" stays "**important**"; a heading keeps its leading "#".
+- In "original" and "suggestion", include the surrounding markup characters EXACTLY as they appear, so the frontend's substring match works and the rendered structure is unchanged. For example, to fix the prose inside "**this are** wrong", return original = "**this are**" and suggestion = "**these are**" — the "**" is preserved on both sides.
+- Treat the content inside math environments ("$...$", "$$...$$", "\\(...\\)", "\\[...\\]") and inside inline/code blocks (\`...\`, \`\`\`...\`\`\`) as UNTOUCHABLE: do NOT grammar-correct, reword, or "translate" anything inside them. Only correct the natural-language prose around the markup.
+- If a LaTeX/Markdown structural element (e.g. a "\\section{...}" title or link text inside "[...](url)") contains a genuine prose error, you may correct the prose inside it, but keep the surrounding command/markup characters byte-for-byte.`;
+
 export function reasonLanguageName(lang: "en" | "zh"): string {
   return lang === "zh" ? "Simplified Chinese (简体中文)" : "English";
 }
@@ -45,7 +53,7 @@ export function assembleSystem(
   reasonLanguage?: "en" | "zh",
   customInstructions?: string,
 ): string {
-  const parts = [sharedFraming, COVERAGE_RULE, FORMATTING_RULE, SCHEMA_DESCRIPTION, VERBATIM_RULE];
+  const parts = [sharedFraming, COVERAGE_RULE, FORMATTING_RULE, MARKUP_PRESERVATION_RULE, SCHEMA_DESCRIPTION, VERBATIM_RULE];
   if (reasonLanguage) {
     // Decouple explanation language from the input text's language:
     // correct the text in its own language, but write reasons in the user's chosen language.

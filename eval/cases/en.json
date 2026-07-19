@@ -83,5 +83,29 @@
     "input": "The committee published its findings after a thorough review of the evidence.",
     "reference": [],
     "notes": "Clean text — no corrections expected. Any change should be clearly optional and non-harmful."
+  },
+  {
+    "id": "en-015",
+    "language": "en",
+    "input": "As show in $\\beta$, the affect of $x_i$ are statistically sigificant.",
+    "reference": ["show → shown", "affect → effect", "are → is", "sigificant → significant", "$\\beta$ and $x_i$ must be preserved verbatim — no changes inside math environments"]
+  },
+  {
+    "id": "en-016",
+    "language": "en",
+    "input": "\\section{Result}\nAs reported by \\cite{smith2020}, the model where robust with $R^2 = 0.9$.",
+    "reference": ["where → was", "\\section{Result}, \\cite{smith2020}, and $R^2 = 0.9$ must all be preserved verbatim (command names, citation keys, math content unchanged)"]
+  },
+  {
+    "id": "en-017",
+    "language": "en",
+    "input": "## Abstract\n**Importants** of this study are that it *are* novel.",
+    "reference": ["Importants → Importance", "are → is (subject-verb agreement, both occurrences)", "## heading marker, ** bold markers, and * italic markers must all be preserved verbatim in both original and suggestion"]
+  },
+  {
+    "id": "en-018",
+    "language": "en",
+    "input": "See [our paer](https://x.com) for details. The `retrun` statment was fixed.",
+    "reference": ["paer → paper", "retrun → return", "statment → statement", "[our paper](https://x.com) link syntax and `retrun` backtick fence must be preserved verbatim"]
   }
 ]
