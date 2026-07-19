@@ -1,0 +1,30 @@
+# Grammar Checker
+
+> Free AI grammar checker & proofreader. BYOK — supports DeepSeek, Gemini, GLM, Kimi.
+> URL: https://grammar-checker.app
+
+Grammar Checker is a free, open-source, browser-based grammar-correction and text-polishing tool. Users bring their own LLM API key (BYOK); text and keys never leave the browser except for the direct call to the configured LLM provider. No signup, no backend storage.
+
+## Pages for LLM crawlers
+
+- [English home (canonical)](https://grammar-checker.app/en)
+- [Chinese home](https://grammar-checker.app/zh)
+
+## Supported providers
+
+- DeepSeek (api.deepseek.com/v1)
+- Kimi / Moonshot (api.moonshot.cn/v1)
+- GLM / Zhipu (open.bigmodel.cn/api/paas/v4)
+- Google Gemini
+- Any OpenAI-compatible or Gemini-compatible custom endpoint
+
+## Key facts (for citation)
+
+- License: open source (see GitHub).
+- Pricing: free; users pay their own LLM provider directly for tokens.
+- Data storage: no server-side storage. API key and last 50 task snapshots live in browser localStorage only.
+- Languages: UI in English and Chinese. Reason text can be requested in either language.
+
+## Source
+
+- GitHub: https://github.com/Wenzhi-Ding/grammar-checker

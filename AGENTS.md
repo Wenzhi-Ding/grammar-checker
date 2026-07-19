@@ -92,6 +92,21 @@ your own diff against a red baseline you didn't create.
 
 - When the user reports a UI element you can't grep in this codebase, don't guess — ask them to paste its HTML from DevTools first. Our classes are all `gp-*`; anything else (e.g. `tc-status-btn`, `tc-spinner`, `content.js` errors mentioning "extension settings") is a browser grammar/translate extension injecting into localhost, not our app.
 
+## SEO / GEO architecture (added 2026-07-19)
+
+Full design: [`docs/superpowers/specs/2026-07-19-seo-geo-design.md`](docs/superpowers/specs/2026-07-19-seo-geo-design.md).
+
+- **URL i18n**: `/en` + `/zh`, root `/` permanently redirects to `/en` via `next.config.ts` `redirects()` (no `app/page.tsx` / `app/layout.tsx` — `app/[lang]/layout.tsx` IS the root layout and owns `<html lang>`).
+- **Locale source = URL only.** `hooks/useLocale.ts` reads from `useParams()`; the old `navigator.language` detection was removed because it caused SSR/client mismatch and broke hreflang. **Do not re-add navigator-based detection.** No auto language redirect either — it would corrupt SEO canonical.
+- **Server-rendered content lives in `app/[lang]/page.tsx`** (hero `<h1>`, features grid, FAQ); the entire interactive editor was lifted verbatim into `app/[lang]/Polisher.tsx` (`"use client"`). Don't merge them back into a single client page — the server component is what makes the page crawlable.
+- **i18n content dictionary**: `lib/i18n/{en,zh}.ts` (`Strings` interface in `lib/i18n/index.ts`). All SEO/GEO strings (title, description, keywords, hero, features, faq, footer, language-switch link) live there. UI components keep their inline `locale === "zh" ? ... : ...` ternaries — do not migrate those into the dictionary; it would create churn for no SEO benefit.
+- **JSON-LD**: `lib/i18n/jsonld.ts` emits `Organization` + `WebApplication` (in layout, locale-independent) and `FAQPage` (in page, locale-aware). The FAQ items in JSON-LD MUST mirror `s.faq` exactly — they are the same array, do not duplicate-edit.
+- **OG image**: `app/[lang]/opengraph-image.tsx` uses `next/og` `ImageResponse` (edge runtime, runtime-generated PNG). Don't replace with a static file — keeping it dynamic lets the per-locale text match the page.
+- **Webmaster verification**: set `NEXT_PUBLIC_GSC_VERIFICATION` (Google) or `NEXT_PUBLIC_BING_VERIFICATION` (Bing) env vars; `generateMetadata` injects the right `<meta>` tag via `verification: { google, other: { "msvalidate.01" } }`. Leave unset in dev.
+- **Analytics**: Microsoft Clarity loaded only when `NEXT_PUBLIC_CLARITY_ID` is set. Vercel Analytics always on. **No GA4** by deliberate decision — see brainstorming Q4.
+- **Files that exist for crawlers only**: `app/robots.ts`, `app/sitemap.ts`, `app/manifest.ts`, `public/llms.txt`. Touch them when adding/removing locales or changing the domain (which is also `NEXT_PUBLIC_SITE_URL`).
+
 ## Open decisions (resolve as the project grows)
 
 - Long-document chunking (v1: short text only; the `Provider` interface reserves a `polishChunk` hook).
+- SEO expansion to content-hub routes (`/about`, `/how-it-works`, `/use-cases/*`) — defer to plan B/C in the SEO/GEO spec until the v1 homepage has been indexed and shows ranking data.

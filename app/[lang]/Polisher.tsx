@@ -1,4 +1,9 @@
-// app/page.tsx
+// app/[lang]/Polisher.tsx
+// Client component. All interactive state for the polish editor lives here.
+// Lifted verbatim from the original app/page.tsx (with the header gaining a
+// language switcher). Pure UI/text decisions remain inline ternaries keyed on
+// useLocale() — which is now URL-driven.
+
 "use client";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { Editor } from "@/components/Editor";
@@ -15,6 +20,7 @@ import { pinSpans } from "@/lib/providers/shared/match";
 import { applyAccept } from "@/lib/providers/shared/offsets";
 import { buildModelOptions, type ProviderEntry } from "@/lib/providers/shared/presets";
 import type { PinnedCorrection } from "@/lib/providers/shared/schema";
+import { getStrings } from "@/lib/i18n";
 
 function findNextSuggestionId(
   suggestions: PinnedCorrection[],
@@ -31,12 +37,13 @@ function findNextSuggestionId(
   return first?.id ?? null;
 }
 
-export default function Home() {
+export function Polisher() {
   const MAX_CHARS = 50000;
   const { settings, update } = useSettings();
   const { tasks, enqueue, update: updateTask, remove: removeTask, markRead } = useTasks();
   const { run, abort } = usePolish(updateTask);
   const locale = useLocale();
+  const s = getStrings(locale);
 
   const [text, setText] = useState("");
   const [suggestions, setSuggestions] = useState<PinnedCorrection[]>([]);
@@ -156,7 +163,7 @@ export default function Home() {
 
   const handleReject = useCallback((id: string) => {
     setSuggestions((prev) => {
-      const newSugs = prev.map((s) => (s.id === id ? { ...s, state: "rejected" as const } : s));
+      const newSugs = prev.map((x) => (x.id === id ? { ...x, state: "rejected" as const } : x));
       setActiveId(findNextSuggestionId(newSugs, id));
       return newSugs;
     });
@@ -244,7 +251,7 @@ export default function Home() {
       <header className="gp-topbar">
         <button
           className="gp-icon-btn gp-tasks-toggle"
-          title="任务列表"
+          title={locale === "zh" ? "任务列表" : "Tasks"}
           onClick={() => setTasksOpen((v) => !v)}
         >
           ☰
@@ -253,6 +260,13 @@ export default function Home() {
           <span className="dot">Aa</span> Grammar Checker
         </div>
         <div className="gp-spacer" />
+        <a
+          className="gp-lang-switch"
+          href={s.switchLang.href}
+          title={s.switchLang.label}
+        >
+          {s.switchLang.label}
+        </a>
         <SettingsPanel settings={settings} update={update} />
       </header>
 
@@ -288,7 +302,7 @@ export default function Home() {
               <div className="gp-acts">
                 <button
                   className="gp-icon-btn"
-                  title={copied ? "Copied!" : "Copy text"}
+                  title={copied ? (locale === "zh" ? "已复制！" : "Copied!") : (locale === "zh" ? "复制" : "Copy text")}
                   disabled={!text}
                   onClick={copyResult}
                 >
@@ -296,7 +310,7 @@ export default function Home() {
                 </button>
                 <button
                   className="gp-icon-btn"
-                  title="Clear"
+                  title={locale === "zh" ? "清空" : "Clear"}
                   disabled={!text && suggestions.length === 0}
                   onClick={handleClear}
                 >
@@ -315,7 +329,9 @@ export default function Home() {
             />
             <div className="gp-actionrow-btns">
               {focused?.status === "running" && (
-                <span className="gp-progress">Polishing… ≈{focused.approxTokens} tokens</span>
+                <span className="gp-progress">
+                  {locale === "zh" ? `润色中… ≈${focused.approxTokens} tokens` : `Polishing… ≈${focused.approxTokens} tokens`}
+                </span>
               )}
               {inReview && (
                 <button
@@ -323,7 +339,7 @@ export default function Home() {
                   onClick={handleAcceptAll}
                   disabled={pendingCount === 0}
                 >
-                  Accept all ({pendingCount})
+                  {locale === "zh" ? `全部接受 (${pendingCount})` : `Accept all (${pendingCount})`}
                 </button>
               )}
               <button
@@ -331,7 +347,7 @@ export default function Home() {
                 onClick={onPolish}
                 disabled={!effective.provider.apiKey || !text || text.length > MAX_CHARS}
               >
-                Polish
+                {locale === "zh" ? "润色" : "Polish"}
               </button>
             </div>
           </div>
@@ -341,7 +357,7 @@ export default function Home() {
               {focused.error.message}
               {focused.error.retryable && (
                 <button onClick={retryFocused} style={{ marginLeft: 8, background: "none", border: "none", color: "var(--gp-blue)", cursor: "pointer", textDecoration: "underline" }}>
-                  重试
+                  {locale === "zh" ? "重试" : "Retry"}
                 </button>
               )}
             </div>
@@ -349,15 +365,17 @@ export default function Home() {
 
           {focused?.status === "interrupted" && (
             <div className="gp-panel gp-panel-empty">
-              任务已中断（页面刷新或关闭）。
+              {locale === "zh" ? "任务已中断（页面刷新或关闭）。" : "Task was interrupted (page refresh or close)."}
               <button onClick={retryFocused} style={{ marginLeft: 8, background: "none", border: "none", color: "var(--gp-blue)", cursor: "pointer", textDecoration: "underline" }}>
-                重新 polish
+                {locale === "zh" ? "重新 polish" : "Re-polish"}
               </button>
             </div>
           )}
 
           {focused?.status === "done" && focused.result && focused.result.corrections.length === 0 && (
-            <div className="gp-panel gp-panel-empty">未发现可润色之处。</div>
+            <div className="gp-panel gp-panel-empty">
+              {locale === "zh" ? "未发现可润色之处。" : "Nothing to polish — your text looks good."}
+            </div>
           )}
 
           {active && (
@@ -368,7 +386,11 @@ export default function Home() {
 
           {unmatched.length > 0 && (
             <details className="gp-panel gp-panel-unmatched">
-              <summary>{unmatched.length} 条无法定位（仅参考）</summary>
+              <summary>
+                {locale === "zh"
+                  ? `${unmatched.length} 条无法定位（仅参考）`
+                  : `${unmatched.length} suggestion(s) couldn't be located (for reference)`}
+              </summary>
               <ul style={{ marginTop: 8, lineHeight: 1.8 }}>
                 {unmatched.map((u) => (
                   <li key={u.id}>
@@ -389,11 +411,7 @@ export default function Home() {
       </div>
 
       <footer className="gp-footer">
-        <p className="gp-footer-line">
-          {locale === "zh"
-            ? "完全开源 · 纯前端运行 · API Key 与文本不会上传到任何服务器"
-            : "100% open source · runs entirely in your browser · your API key and text never leave your device."}
-        </p>
+        <p className="gp-footer-line">{s.footerLine}</p>
         <a
           className="gp-footer-link"
           href="https://github.com/Wenzhi-Ding/grammar-checker"
