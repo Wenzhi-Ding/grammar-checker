@@ -29,7 +29,7 @@ export const zh: Strings = {
     {
       title: "BYOK 自带 API Key",
       body:
-        "粘贴你自己的 DeepSeek、Gemini、GLM 或 Kimi API Key 即可使用。无需注册、无需订阅、不经我们按次计费。按 DeepSeek V4 Flash 估算，单次润色约 ¥0.004，Grammarly 一年的 $144 订阅费够你润色 20 万次以上。",
+        "粘贴你自己的 DeepSeek、Gemini、GLM 或 Kimi API Key 即可使用。无需注册、无需订阅。按 DeepSeek V4 Flash 估算，单次润色约 ¥0.004，Grammarly 一年的 $144 订阅费够你润色 20 万次以上。",
     },
     {
       title: "纯前端运行",

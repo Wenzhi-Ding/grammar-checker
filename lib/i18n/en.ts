@@ -29,7 +29,7 @@ export const en: Strings = {
     {
       title: "Bring your own key (BYOK)",
       body:
-        "Paste your own API key for DeepSeek, Gemini, GLM, or Kimi. No accounts, no subscription, no per-query billing through us. At DeepSeek V4 Flash rates, one polish costs about $0.0006 — the $144 you'd spend on a year of Grammarly buys 200,000+ polishes.",
+        "Paste your own API key for DeepSeek, Gemini, GLM, or Kimi. No accounts, no subscription. At DeepSeek V4 Flash rates, one polish costs about $0.0006 — the $144 you'd spend on a year of Grammarly buys 200,000+ polishes.",
     },
     {
       title: "Runs entirely in your browser",
