@@ -95,27 +95,40 @@ export function SettingsPanel({ settings, update }: Props) {
             onChange={(e) => patchProvider(editing.id, { baseURL: e.target.value })}
           />
 
-          <label className="gp-field-label">API Key</label>
-          <input
-            className="gp-input"
-            type="password"
-            value={editing?.apiKey ?? ""}
-            placeholder={
-              locale === "zh"
-                ? editing?.keyUrl
-                  ? `从 ${editing.keyUrl} 获取`
-                  : "粘贴 API Key"
-                : editing?.keyUrl
-                  ? `Get it from ${editing.keyUrl}`
-                  : "Paste your API key"
-            }
-            onChange={(e) => patchProvider(editing.id, { apiKey: e.target.value })}
-          />
-          <p className="gp-key-note">
-            {locale === "zh"
-              ? "Key 与文本仅存于浏览器，绝不上传。"
-              : "Your key & text never leave the browser."}
-          </p>
+          {editing?.requiresKey === false ? (
+            <>
+              <label className="gp-field-label">API Key</label>
+              <p className="gp-key-note">
+                {locale === "zh"
+                  ? "Ollama 在本地运行，无需 API Key。请确保 `ollama serve` 已启动。"
+                  : "Ollama runs locally — no API key needed. Make sure `ollama serve` is running."}
+              </p>
+            </>
+          ) : (
+            <>
+              <label className="gp-field-label">API Key</label>
+              <input
+                className="gp-input"
+                type="password"
+                value={editing?.apiKey ?? ""}
+                placeholder={
+                  locale === "zh"
+                    ? editing?.keyUrl
+                      ? `从 ${editing.keyUrl} 获取`
+                      : "粘贴 API Key"
+                    : editing?.keyUrl
+                      ? `Get it from ${editing.keyUrl}`
+                      : "Paste your API key"
+                }
+                onChange={(e) => patchProvider(editing.id, { apiKey: e.target.value })}
+              />
+              <p className="gp-key-note">
+                {locale === "zh"
+                  ? "Key 与文本仅存于浏览器，绝不上传。"
+                  : "Your key & text never leave the browser."}
+              </p>
+            </>
+          )}
 
           <label className="gp-field-label">Models (one per line)</label>
           <textarea
