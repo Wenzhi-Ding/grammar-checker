@@ -15,8 +15,9 @@ export interface Settings {
   customInstructions: string;
 }
 
-const STORAGE_KEY = "grammar-polisher.settings.v8";
+const STORAGE_KEY = "grammar-polisher.settings.v9";
 const LEGACY_KEYS = [
+  "grammar-polisher.settings.v8",
   "grammar-polisher.settings.v7",
   "grammar-polisher.settings.v6",
   "grammar-polisher.settings.v5",
