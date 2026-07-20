@@ -23,7 +23,7 @@ export const BUILTIN_PROVIDERS: ProviderEntry[] = [
   { id: "kimi", label: "Kimi (Moonshot)", adapter: "openai-compatible", baseURL: "https://api.moonshot.cn/v1", apiKey: "", models: ["kimi-k2.6", "kimi-k2.7"], keyUrl: "https://platform.moonshot.cn", builtin: true, requiresKey: true },
   { id: "glm", label: "GLM (智谱)", adapter: "openai-compatible", baseURL: "https://open.bigmodel.cn/api/paas/v4", apiKey: "", models: ["glm-5.2"], keyUrl: "https://open.bigmodel.cn", builtin: true, requiresKey: true },
   { id: "gemini", label: "Gemini", adapter: "gemini", baseURL: "", apiKey: "", models: ["gemini-3.5-flash", "gemini-3.1-pro"], keyUrl: "https://ai.google.dev", builtin: true, requiresKey: true },
-  { id: "ollama", label: "Ollama (Local)", adapter: "openai-compatible", baseURL: "http://localhost:11434/v1", apiKey: "", models: ["gemma4:12b"], keyUrl: "", builtin: true, requiresKey: false },
+  { id: "ollama", label: "Ollama (Local)", adapter: "openai-compatible", baseURL: "http://localhost:11434/v1", apiKey: "", models: [], keyUrl: "", builtin: true, requiresKey: false },
 ];
 
 /** Fresh deep copies of the built-ins (for initial settings). */

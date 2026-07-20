@@ -21,7 +21,7 @@
 | Ollama 形态 | 第五个 builtin，不是 custom provider |
 | adapter | `openai-compatible`（复用） |
 | baseURL | `http://localhost:11434/v1`（用户可在 Settings 改） |
-| 默认模型 | 仅 `gemma4:12b`（用户确认） |
+| 默认模型 | 无（`models: []`）— 暂未有验证可用的模型；用户在 Settings 自行填入 Ollama tag |
 | key 处理 | 新增 `ProviderEntry.requiresKey: boolean`；Ollama = false |
 | 模型发现 | hardcoded（不做 `/api/tags` live fetch） |
 | 代理回落 | 检测到 localhost URL 时跳过，直接抛清晰错误 |
@@ -65,7 +65,7 @@ export const BUILTIN_PROVIDERS: ProviderEntry[] = [
     adapter: "openai-compatible",
     baseURL: "http://localhost:11434/v1",
     apiKey: "",
-    models: ["gemma4:12b"],
+    models: [],
     keyUrl: "",
     builtin: true,
     requiresKey: false,

@@ -26,11 +26,11 @@ describe("providers", () => {
     expect(BUILTIN_PROVIDERS.filter((p) => p.id !== "ollama").every((p) => p.requiresKey === true)).toBe(true);
   });
 
-  it("seeds Ollama pointing at localhost with the gemma4:12b default model", () => {
+  it("seeds Ollama pointing at localhost with no default models", () => {
     const ollama = BUILTIN_PROVIDERS.find((p) => p.id === "ollama");
     expect(ollama?.adapter).toBe("openai-compatible");
     expect(ollama?.baseURL).toBe("http://localhost:11434/v1");
-    expect(ollama?.models).toContain("gemma4:12b");
+    expect(ollama?.models).toEqual([]);
   });
 
   it("defaultProviders returns fresh copies (no shared model-array refs)", () => {
@@ -52,11 +52,19 @@ describe("providers", () => {
 
   it("buildModelOptions includes keyless providers even without an API key", () => {
     const ps = defaultProviders();
-    // Ollama is seeded with empty apiKey but requiresKey:false
+    // Ollama seeds with empty models — simulate the user adding one in Settings.
+    const ollama = ps.find((p) => p.id === "ollama")!;
+    ollama.models.push("llama3.1:8b");
     const opts = buildModelOptions(ps);
     const ollamaOpts = opts.filter((o) => o.provider.id === "ollama");
     expect(ollamaOpts.length).toBe(1);
-    expect(ollamaOpts[0].model).toBe("gemma4:12b");
+    expect(ollamaOpts[0].model).toBe("llama3.1:8b");
+  });
+
+  it("buildModelOptions yields no Ollama entries when its model list is empty", () => {
+    const ps = defaultProviders(); // Ollama ships with models: []
+    const opts = buildModelOptions(ps);
+    expect(opts.filter((o) => o.provider.id === "ollama")).toHaveLength(0);
   });
 
   it("buildModelOptions still excludes keyed providers with empty API key", () => {
