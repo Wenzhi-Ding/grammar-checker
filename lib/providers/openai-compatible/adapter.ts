@@ -99,7 +99,11 @@ export function createOpenAICompatibleProvider({ id, fetchImpl }: AdapterOpts): 
       const { url, init } = buildStreamRequest(text, config);
       const res = await callStreamWithFallback(
         () => fetchFn(url, { ...init, signal }),
-        { proxyBody: { providerId: id, adapter: "openai-compatible", payload: { text, config } }, signal },
+        {
+          proxyBody: { providerId: id, adapter: "openai-compatible", payload: { text, config } },
+          signal,
+          baseURL: config.baseURL,
+        },
         (u, i) => fetchFn(u, i),
       );
       if (!res.ok) throw await toHttpError(`provider ${id}`, res);
