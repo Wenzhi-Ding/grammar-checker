@@ -10,8 +10,27 @@ import {
 
 describe("providers", () => {
   it("seeds the built-in providers with empty keys", () => {
-    expect(BUILTIN_PROVIDERS.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi"]);
+    expect(BUILTIN_PROVIDERS.map((p) => p.id).sort()).toEqual([
+      "deepseek",
+      "gemini",
+      "glm",
+      "kimi",
+      "ollama",
+    ]);
     expect(BUILTIN_PROVIDERS.every((p) => p.builtin && p.apiKey === "")).toBe(true);
+  });
+
+  it("marks only Ollama as keyless", () => {
+    const ollama = BUILTIN_PROVIDERS.find((p) => p.id === "ollama");
+    expect(ollama?.requiresKey).toBe(false);
+    expect(BUILTIN_PROVIDERS.filter((p) => p.id !== "ollama").every((p) => p.requiresKey === true)).toBe(true);
+  });
+
+  it("seeds Ollama pointing at localhost with the gemma4:12b default model", () => {
+    const ollama = BUILTIN_PROVIDERS.find((p) => p.id === "ollama");
+    expect(ollama?.adapter).toBe("openai-compatible");
+    expect(ollama?.baseURL).toBe("http://localhost:11434/v1");
+    expect(ollama?.models).toContain("gemma4:12b");
   });
 
   it("defaultProviders returns fresh copies (no shared model-array refs)", () => {
@@ -24,11 +43,31 @@ describe("providers", () => {
 
   it("buildModelOptions only includes providers that have an API key", () => {
     const ps = defaultProviders();
-    expect(buildModelOptions(ps)).toHaveLength(0); // none configured
+    expect(buildModelOptions(ps).filter((o) => o.provider.id !== "ollama")).toHaveLength(0); // none configured
     ps[0].apiKey = "k";
-    const opts = buildModelOptions(ps);
+    const opts = buildModelOptions(ps).filter((o) => o.provider.id !== "ollama");
     expect(opts.every((o) => o.provider.id === "deepseek")).toBe(true);
     expect(opts.length).toBe(ps[0].models.length);
+  });
+
+  it("buildModelOptions includes keyless providers even without an API key", () => {
+    const ps = defaultProviders();
+    // Ollama is seeded with empty apiKey but requiresKey:false
+    const opts = buildModelOptions(ps);
+    const ollamaOpts = opts.filter((o) => o.provider.id === "ollama");
+    expect(ollamaOpts.length).toBe(1);
+    expect(ollamaOpts[0].model).toBe("gemma4:12b");
+  });
+
+  it("buildModelOptions still excludes keyed providers with empty API key", () => {
+    const ps = defaultProviders();
+    // deepseek/kimi/glm/gemini all have requiresKey:true and empty apiKey
+    const opts = buildModelOptions(ps);
+    expect(opts.filter((o) => o.provider.id !== "ollama")).toHaveLength(0);
+  });
+
+  it("newCustomProvider defaults to requiresKey:true", () => {
+    expect(newCustomProvider().requiresKey).toBe(true);
   });
 
   it("newCustomProvider yields a unique, non-builtin entry", () => {
@@ -46,6 +85,6 @@ describe("providers", () => {
     expect(merged.find((p) => p.id === "deepseek")?.apiKey).toBe("kept");
     expect(merged.find((p) => p.id === "deepseek")?.baseURL).toBe("https://edited");
     // missing built-ins filled in
-    expect(merged.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi"]);
+    expect(merged.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi", "ollama"]);
   });
 });
