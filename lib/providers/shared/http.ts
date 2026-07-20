@@ -8,6 +8,17 @@ export interface ProxyBody {
   [key: string]: unknown;
 }
 
+/** True if the URL points at the user's own machine — the Vercel proxy cannot reach it. */
+function isLocalhostBaseURL(baseURL: string | undefined): boolean {
+  if (!baseURL) return false;
+  try {
+    const host = new URL(baseURL).hostname.toLowerCase();
+    return host === "localhost" || host === "127.0.0.1" || host === "::1";
+  } catch {
+    return false;
+  }
+}
+
 /**
  * Build an Error for a non-OK upstream response. Embeds a truncated body
  * excerpt (the provider's own error detail, e.g. "Insufficient Balance") so
@@ -70,13 +81,18 @@ export async function callWithFallback<T = unknown>(
  */
 export async function callStreamWithFallback(
   direct: () => Promise<Response>,
-  opts: { proxyBody: ProxyBody; signal?: AbortSignal },
+  opts: { proxyBody: ProxyBody; signal?: AbortSignal; baseURL?: string },
   proxyFetch?: (url: string, init: RequestInit) => Promise<Response>,
 ): Promise<Response> {
   try {
     return await direct();
   } catch (err) {
     if (!(err instanceof TypeError)) throw err;
+    if (isLocalhostBaseURL(opts.baseURL)) {
+      throw new Error(
+        `Could not reach local Ollama at ${opts.baseURL}. Is \`ollama serve\` running? (Ollama only works when the app runs locally, not on the deployed site.)`,
+      );
+    }
     const fetcher = proxyFetch ?? globalThis.fetch;
     const res = await fetcher("/api/polish", {
       method: "POST",

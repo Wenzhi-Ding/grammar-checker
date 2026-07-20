@@ -61,4 +61,43 @@ describe("callStreamWithFallback", () => {
     const init = proxyFetch.mock.calls[0][1] as RequestInit;
     expect(init.signal).toBe(ac.signal);
   });
+
+  it("does NOT fall back to proxy when baseURL is localhost (Ollama case)", async () => {
+    const direct = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const proxyFetch = vi.fn();
+    await expect(
+      callStreamWithFallback(
+        direct,
+        { proxyBody: { providerId: "ollama" }, baseURL: "http://localhost:11434/v1" },
+        proxyFetch,
+      ),
+    ).rejects.toThrow(/Ollama.*ollama serve/i);
+    expect(proxyFetch).not.toHaveBeenCalled();
+  });
+
+  it("still falls back to proxy when baseURL is a cloud URL", async () => {
+    const proxyRes = { ok: true, status: 200 } as unknown as Response;
+    const direct = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const proxyFetch = vi.fn().mockResolvedValue(proxyRes);
+    const out = await callStreamWithFallback(
+      direct,
+      { proxyBody: { providerId: "kimi" }, baseURL: "https://api.moonshot.cn/v1" },
+      proxyFetch,
+    );
+    expect(out).toBe(proxyRes);
+    expect(proxyFetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("treats 127.0.0.1 as localhost too", async () => {
+    const direct = vi.fn().mockRejectedValue(new TypeError("Failed to fetch"));
+    const proxyFetch = vi.fn();
+    await expect(
+      callStreamWithFallback(
+        direct,
+        { proxyBody: {}, baseURL: "http://127.0.0.1:11434/v1" },
+        proxyFetch,
+      ),
+    ).rejects.toThrow(/Ollama.*ollama serve/i);
+    expect(proxyFetch).not.toHaveBeenCalled();
+  });
 });
