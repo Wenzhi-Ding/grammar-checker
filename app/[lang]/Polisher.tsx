@@ -67,7 +67,7 @@ export function Polisher() {
   const effective = useMemo(() => {
     const options = buildModelOptions(settings.providers);
     const cur = settings.providers.find((p) => p.id === settings.selectedProviderId);
-    if (cur && cur.apiKey && cur.models.includes(settings.selectedModel)) {
+    if (cur && (cur.apiKey || cur.requiresKey === false) && cur.models.includes(settings.selectedModel)) {
       return { provider: cur, model: settings.selectedModel, options };
     }
     if (options.length) return { provider: options[0].provider, model: options[0].model, options };
@@ -347,7 +347,11 @@ export function Polisher() {
               <button
                 className="gp-btn gp-btn-primary"
                 onClick={onPolish}
-                disabled={!effective.provider.apiKey || !text || text.length > MAX_CHARS}
+                disabled={
+                  (!effective.provider.apiKey && effective.provider.requiresKey !== false) ||
+                  !text ||
+                  text.length > MAX_CHARS
+                }
               >
                 {locale === "zh" ? "润色" : "Polish"}
               </button>
