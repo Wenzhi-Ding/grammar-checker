@@ -55,6 +55,25 @@ describe("usePolish.run", () => {
     expect(update).toHaveBeenCalledWith("t1", expect.objectContaining({ status: "error" }));
   });
 
+  it("does NOT mark no-key error for keyless providers (e.g. Ollama)", async () => {
+    const update = vi.fn();
+    const polishStream = vi.fn().mockResolvedValue({ corrections: [] });
+    mockedGetProvider.mockReturnValue({ id: "ollama", polish: vi.fn(), polishStream });
+    const { result } = renderHook(() => usePolish(update));
+    let out: unknown;
+    await act(async () => {
+      out = await result.current.run("t1", "hello", {
+        ...OPTS,
+        providerId: "ollama",
+        requiresKey: false,
+        config: { ...OPTS.config, apiKey: "", baseURL: "http://localhost:11434/v1" },
+      });
+    });
+    expect(out).toEqual({ corrections: [] });
+    expect(polishStream).toHaveBeenCalledOnce();
+    expect(update).not.toHaveBeenCalledWith("t1", expect.objectContaining({ status: "error" }));
+  });
+
   it("classifies failures into the task error field", async () => {
     const update = vi.fn();
     const polishStream = vi.fn().mockRejectedValue(Object.assign(new Error("unauthorized"), { status: 401 }));

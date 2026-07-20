@@ -92,6 +92,7 @@ export function Polisher() {
         providerId: effective.provider.id,
         adapter: effective.provider.adapter,
         lang: locale,
+        requiresKey: effective.provider.requiresKey,
         config: {
           apiKey: effective.provider.apiKey,
           model: effective.model,

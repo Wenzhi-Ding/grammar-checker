@@ -16,6 +16,8 @@ export interface RunOptions {
   adapter: AdapterKind;
   config: ProviderConfig;
   lang: Locale;
+  /** False for keyless providers (e.g. Ollama) — skips the no-key guard. */
+  requiresKey?: boolean;
 }
 
 type UpdateTask = (id: string, patch: Partial<PolishTask>) => void;
@@ -30,7 +32,7 @@ export function usePolish(update: UpdateTask) {
 
   const run = useCallback(
     async (taskId: string, text: string, opts: RunOptions): Promise<PolishResult | null> => {
-      if (!opts.config.apiKey) {
+      if (!opts.config.apiKey && opts.requiresKey !== false) {
         update(taskId, { status: "error", error: noKeyError(opts.lang) });
         return null;
       }
