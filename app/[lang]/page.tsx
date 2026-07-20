@@ -1,8 +1,9 @@
 // app/[lang]/page.tsx
-// Server component. Renders the static, crawlable content (hero, features,
-// FAQ) plus the interactive client <Polisher />. FAQ is duplicated into
-// JSON-LD via faqSchema() so LLM/GEO crawlers see the same Q&A as structured
-// data, not just HTML.
+// Server component. Google-Translate-style: interactive editor comes FIRST,
+// all crawlable SEO content (hero text + features + FAQ) lives BELOW the
+// editor so it doesn't push the editor below the fold. H1 and all SEO
+// copy are still server-rendered in the HTML, so Google/LLM crawlers see
+// them — they're just visually below the fold, which is fine for SEO.
 
 import { notFound } from "next/navigation";
 import { getStrings, isLocale } from "@/lib/i18n";
@@ -20,16 +21,19 @@ export default async function HomePage({ params }: PageProps) {
 
   return (
     <>
-      {/* Hero — crawlable <h1> + subtitle */}
-      <section className="gp-hero">
-        <div className="gp-hero-inner">
-          <h1 className="gp-hero-h1">{s.heroH1}</h1>
-          <p className="gp-hero-sub">{s.heroSub}</p>
+      {/* Interactive editor (client) — first thing the user sees */}
+      <Polisher />
+
+      {/* SEO content — below the fold.
+          H1 + hero copy are kept here (not deleted) because Google indexes
+          the full DOM, not just the visible viewport. The H1 in this section
+          is the page's primary <h1>. */}
+      <section className="gp-seo-hero" aria-label={s.lang === "zh" ? "关于此工具" : "About this tool"}>
+        <div className="gp-seo-hero-inner">
+          <h1 className="gp-seo-h1">{s.heroH1}</h1>
+          <p className="gp-seo-sub">{s.heroSub}</p>
         </div>
       </section>
-
-      {/* Interactive editor (client) */}
-      <Polisher />
 
       {/* Features — crawlable features list */}
       <section className="gp-features" aria-label={s.lang === "zh" ? "功能" : "Features"}>

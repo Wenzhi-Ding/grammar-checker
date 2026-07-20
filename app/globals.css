@@ -221,7 +221,7 @@ body {
 /* ---- task queue layout (sidebar + main) ---- */
 .gp-layout {
   display: flex; gap: 24px; align-items: flex-start;
-  max-width: 1120px; margin: 40px auto 80px; padding: 0 20px;
+  max-width: 1120px; margin: 20px auto 32px; padding: 0 20px;
 }
 .gp-layout .gp-wrap { flex: 1; min-width: 0; max-width: none; margin: 0; padding: 0; }
 .gp-tasks-wrap { width: 280px; flex-shrink: 0; position: sticky; top: 88px; }
@@ -275,9 +275,6 @@ body {
   .gp-tasks { border-radius: 0; height: 100%; }
   .gp-tasks-backdrop { display: block; position: fixed; inset: 64px 0 0 0; z-index: 54; background: rgba(0, 0, 0, 0.3); }
   .gp-layout { gap: 0; }
-  .gp-hero { padding: 32px 20px 8px; }
-  .gp-hero-h1 { font-size: 30px; }
-  .gp-hero-sub { font-size: 15px; }
   .gp-features-inner { grid-template-columns: 1fr; }
 }
 
@@ -293,18 +290,26 @@ body {
 }
 .gp-lang-switch:hover { background: var(--gp-blue-soft); border-color: var(--gp-blue); color: var(--gp-blue); }
 
-/* ---- hero (server-rendered, crawlable) ---- */
-.gp-hero {
-  max-width: 1120px; margin: 0 auto; padding: 56px 20px 24px;
+/* ---- SEO hero — sits BELOW the editor (Google-Translate style) ---- */
+/* The H1 + sub live here, not at the top of the page. Styled as a quiet
+   section header for the SEO content block rather than a loud landing hero. */
+.gp-seo-hero {
+  max-width: 760px; margin: 0 auto; padding: 40px 20px 8px;
+  border-top: 1px solid var(--gp-line);
 }
-.gp-hero-inner { max-width: 760px; }
-.gp-hero-h1 {
-  margin: 0 0 12px;
-  font-size: 40px; font-weight: 700; line-height: 1.15;
+.gp-seo-hero-inner { text-align: center; }
+.gp-seo-h1 {
+  margin: 0 0 10px;
+  font-size: 26px; font-weight: 700; line-height: 1.2;
   color: var(--gp-text); letter-spacing: -0.01em;
 }
-.gp-hero-sub {
-  margin: 0; font-size: 17px; line-height: 1.55; color: var(--gp-sub);
+.gp-seo-sub {
+  margin: 0; font-size: 15px; line-height: 1.55; color: var(--gp-sub);
+  max-width: 620px; margin-left: auto; margin-right: auto;
+}
+@media (max-width: 599px) {
+  .gp-seo-h1 { font-size: 22px; }
+  .gp-seo-sub { font-size: 14px; }
 }
 
 /* ---- features grid (crawlable) ---- */
