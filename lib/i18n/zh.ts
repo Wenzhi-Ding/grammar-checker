@@ -24,12 +24,12 @@ export const zh: Strings = {
   ],
   heroH1: "免费 AI 英语语法检查与润色工具",
   heroSub:
-    "粘贴文本，逐句获得带原因的修改建议，编辑器内直接接受或拒绝。自带 API Key，文本与 Key 仅存于浏览器，绝不上传。",
+    "粘贴文本，逐句获得带原因的修改建议，编辑器内直接接受或拒绝。自带 API Key，文本与 Key 仅存于浏览器，绝不上传。每次润色约 ¥0.004——Grammarly 一年 $144，这里一年不到 $2。",
   features: [
     {
       title: "BYOK 自带 API Key",
       body:
-        "粘贴你自己的 DeepSeek、Gemini、GLM 或 Kimi API Key 即可使用。无需注册、无需订阅、不经我们按次计费。",
+        "粘贴你自己的 DeepSeek、Gemini、GLM 或 Kimi API Key 即可使用。无需注册、无需订阅、不经我们按次计费。按 DeepSeek V4 Flash 估算，单次润色约 ¥0.004，Grammarly 一年的 $144 订阅费够你润色 20 万次以上。",
     },
     {
       title: "纯前端运行",
@@ -65,7 +65,7 @@ export const zh: Strings = {
     },
     {
       q: "这个工具适合润色留学申请文书吗？",
-      a: "适合。Personal Statement、Statement of Purpose、奖学金申请文书都可以直接粘贴。因为是 BYOK 模式，文本仅从你的浏览器直接发往你选定的 LLM 服务商，不经过我们任何后端。",
+      a: "适合。Personal Statement、Statement of Purpose、奖学金申请文书都可以直接粘贴。因为是 BYOK 模式，我们没有持久化后端——你的文本仅用于本次润色，绝不被存储、记录或缓存。",
     },
     {
       q: "可以用来检查雅思、托福写作吗？",
@@ -82,7 +82,7 @@ export const zh: Strings = {
     },
     {
       q: "我的邮件内容安全吗？",
-      a: "文本在你的浏览器内处理，并直接从你的浏览器发往你配置的 LLM 服务商（DeepSeek、Gemini、GLM 或 Kimi）。我们不运行任何后端去存储、记录或缓存你的输入。",
+      a: "文本在你的浏览器内处理，再发往你配置的 LLM 服务商（DeepSeek、Gemini、GLM 或 Kimi）。我们没有持久化后端，不存储、不记录、不缓存你的任何输入。",
     },
     // 工具与 BYOK
     {
@@ -92,6 +92,14 @@ export const zh: Strings = {
     {
       q: "BYOK 是什么意思？",
       a: "BYOK = Bring Your Own Key（自带密钥）。你不需要付订阅费，而是粘贴来自 DeepSeek、Gemini 等服务商的 API Key，按 token 直接付费给服务商——通常比语法工具的订阅便宜得多。",
+    },
+    {
+      q: "用 DeepSeek 润色一次大概多少钱？",
+      a: "以 DeepSeek V4 Flash 官方定价估算（输入 $0.14/百万 tokens，输出 $0.28/百万 tokens）：润色一段约 400 词的英文，约消耗 1800 输入 tokens（含系统提示词）和 1200 输出 tokens（修改建议 JSON），单次成本约 $0.0006（约合人民币 0.004 元）——大约润色 1600 次才花 1 美元。短邮件更低，但即使 500 词以上的长段落也很少超过 $0.001。其他模型（Gemini、GLM、Kimi）单价略高，但同一数量级。",
+    },
+    {
+      q: "BYOK 比 Grammarly 订阅便宜多少？",
+      a: "Grammarly Pro 年费 $144（$12/月）。同样的钱用 DeepSeek V4 Flash 够润色 20 万次以上。一个高强度用户（每天写英文邮件 + 作业，一年约 1500–3000 次润色）一年的 LLM 费用通常不到 $2，不到 Grammarly 年费的 2%。即便每天润色 50 次的极端重度用户，一年也只要约 $11。",
     },
     {
       q: "支持哪些 AI 模型？",

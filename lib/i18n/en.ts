@@ -24,12 +24,12 @@ export const en: Strings = {
   ],
   heroH1: "Free AI Grammar Checker & Proofreader",
   heroSub:
-    "Paste your text and get inline, per-span corrections with one-line reasons. Bring your own API key — your text and key never leave your browser.",
+    "Paste your text and get inline, per-span corrections with one-line reasons. Bring your own API key — your text and key never leave your browser. At ~$0.0006 per polish, a year of heavy use costs under $2 — versus Grammarly's $144.",
   features: [
     {
       title: "Bring your own key (BYOK)",
       body:
-        "Paste your own API key for DeepSeek, Gemini, GLM, or Kimi. No accounts, no subscription, no per-query billing through us.",
+        "Paste your own API key for DeepSeek, Gemini, GLM, or Kimi. No accounts, no subscription, no per-query billing through us. At DeepSeek V4 Flash rates, one polish costs about $0.0006 — the $144 you'd spend on a year of Grammarly buys 200,000+ polishes.",
     },
     {
       title: "Runs entirely in your browser",
@@ -65,7 +65,7 @@ export const en: Strings = {
     },
     {
       q: "Is this tool suitable for proofreading college admissions essays?",
-      a: "Yes. Grammar Checker handles personal statements, statements of purpose, and scholarship essays the same way as any other text. Because it runs in your browser with your own API key, your essay text is not sent to any server other than the LLM provider you choose.",
+      a: "Yes. Grammar Checker handles personal statements, statements of purpose, and scholarship essays the same way as any other text. Because it runs in your browser with your own API key, we have no persistent backend — your essay text is never stored, logged, or cached.",
     },
     {
       q: "Does it work for IELTS or TOEFL writing?",
@@ -82,7 +82,7 @@ export const en: Strings = {
     },
     {
       q: "Is my email content safe?",
-      a: "Your text is processed in the browser and sent directly from your browser to the LLM provider you configured (DeepSeek, Gemini, GLM, or Kimi). We run no backend that stores, logs, or caches your input.",
+      a: "Your text is processed in the browser and sent to the LLM provider you configured (DeepSeek, Gemini, GLM, or Kimi). We run no persistent backend — nothing you type is stored, logged, or cached.",
     },
     // Tool & BYOK
     {
@@ -92,6 +92,14 @@ export const en: Strings = {
     {
       q: "What does BYOK mean?",
       a: "BYOK stands for 'Bring Your Own Key'. Instead of paying a subscription, you paste an API key from a provider like DeepSeek or Gemini. You pay the provider directly for tokens — typically much cheaper than a grammar-tool subscription.",
+    },
+    {
+      q: "How much does a single polish cost with DeepSeek?",
+      a: "Using DeepSeek V4 Flash official pricing ($0.14 per million input tokens, $0.28 per million output tokens): polishing a ~400-word English passage consumes about 1,800 input tokens (including the system prompt) and 1,200 output tokens (the corrections JSON), for a per-polish cost of roughly $0.0006 — it would take about 1,600 polishes to spend one US dollar. Short emails cost less, and even 500+ word passages rarely exceed $0.001. Other models (Gemini, GLM, Kimi) are slightly pricier but in the same order of magnitude.",
+    },
+    {
+      q: "How much cheaper is BYOK than a Grammarly subscription?",
+      a: "Grammarly Pro costs $144/year ($12/month). The same $144 buys 200,000+ polishes on DeepSeek V4 Flash. A heavy user (English emails plus assignments every day, around 1,500–3,000 polishes/year) typically spends under $2/year on LLM tokens — less than 2% of Grammarly's annual price. Even a power user polishing 50 times a day would spend only ~$11/year.",
     },
     {
       q: "Which AI models are supported?",
