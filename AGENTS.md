@@ -78,6 +78,8 @@ your own diff against a red baseline you didn't create.
 - UI text and prompts: English-first unless the user asks otherwise.
 - Intentionally-unused destructured variables should use a `_` prefix (e.g., `_apiKey`); the eslint config already honors this pattern.
 - Disabling `react-hooks/set-state-in-effect` is acceptable when deriving state from an async result inside `useEffect` (see `app/page.tsx` and `hooks/useSettings.ts`). Document with a comment explaining why the rule does not apply. Put the `// eslint-disable-next-line react-hooks/set-state-in-effect` ON the exact line that calls setState — not on the effect line, not after the body (a misplaced disable triggers "Unused eslint-disable directive").
+- **No hardcoded user-visible strings.** Route any user-facing text (button labels, status, tooltips, placeholders, error messages, empty-state copy) through `lib/i18n/{en,zh}.ts` (for SEO/GEO blocks) or `useLocale()` + inline `locale === "zh" ? ... : ...` (for in-component strings) or a `lang: Locale` parameter (for pure functions in `lib/` — see `lib/tasks/format.ts`, `lib/providers/shared/errors.ts`). Never hardcode Chinese or English literals in components/hooks/lib.
+- **After any i18n-touching change**, sweep for missed strings: `grep -rP "[\x{4e00}-\x{9fff}]" components/ hooks/ lib/ app/ --include="*.ts" --include="*.tsx"`. Every hit must be either in `lib/i18n/zh.ts` (the dictionary) or in a test file — anything else is a bug.
 
 ## Editor implementation gotchas
 
