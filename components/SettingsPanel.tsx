@@ -100,7 +100,15 @@ export function SettingsPanel({ settings, update }: Props) {
             className="gp-input"
             type="password"
             value={editing?.apiKey ?? ""}
-            placeholder={editing?.keyUrl ? `从 ${editing.keyUrl} 获取` : "粘贴 API Key"}
+            placeholder={
+              locale === "zh"
+                ? editing?.keyUrl
+                  ? `从 ${editing.keyUrl} 获取`
+                  : "粘贴 API Key"
+                : editing?.keyUrl
+                  ? `Get it from ${editing.keyUrl}`
+                  : "Paste your API key"
+            }
             onChange={(e) => patchProvider(editing.id, { apiKey: e.target.value })}
           />
           <p className="gp-key-note">

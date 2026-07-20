@@ -91,6 +91,7 @@ export function Polisher() {
       const body = await run(id, snapshot, {
         providerId: effective.provider.id,
         adapter: effective.provider.adapter,
+        lang: locale,
         config: {
           apiKey: effective.provider.apiKey,
           model: effective.model,
@@ -109,7 +110,7 @@ export function Polisher() {
         updateTask(id, { unread: true });
       }
     },
-    [settings, effective, enqueue, run, updateTask],
+    [settings, effective, enqueue, run, updateTask, locale],
   );
 
   const onPolish = useCallback(() => {
@@ -280,6 +281,7 @@ export function Polisher() {
               setTasksOpen(false);
             }}
             onRemove={handleRemoveTask}
+            lang={locale}
           />
         </div>
         {tasksOpen && <div className="gp-tasks-backdrop" onClick={() => setTasksOpen(false)} />}

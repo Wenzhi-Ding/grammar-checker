@@ -3,10 +3,11 @@
 import { useCallback, useRef } from "react";
 import { getProviderFor } from "@/lib/providers/shared";
 import { callWithFallback } from "@/lib/providers/shared/http";
-import { toPolishError } from "@/lib/providers/shared/errors";
+import { noKeyError, toPolishError } from "@/lib/providers/shared/errors";
 import type { PolishResult, ProviderConfig } from "@/lib/providers/shared/schema";
 import type { AdapterKind } from "@/lib/providers/shared/presets";
 import type { PolishTask } from "@/lib/tasks/types";
+import type { Locale } from "@/lib/i18n";
 
 export type { PolishError, PolishErrorKind } from "@/lib/providers/shared/errors";
 
@@ -14,6 +15,7 @@ export interface RunOptions {
   providerId: string;
   adapter: AdapterKind;
   config: ProviderConfig;
+  lang: Locale;
 }
 
 type UpdateTask = (id: string, patch: Partial<PolishTask>) => void;
@@ -29,10 +31,7 @@ export function usePolish(update: UpdateTask) {
   const run = useCallback(
     async (taskId: string, text: string, opts: RunOptions): Promise<PolishResult | null> => {
       if (!opts.config.apiKey) {
-        update(taskId, {
-          status: "error",
-          error: { kind: "no-key", message: "请先在设置里填写 API Key", retryable: false },
-        });
+        update(taskId, { status: "error", error: noKeyError(opts.lang) });
         return null;
       }
       const ac = new AbortController();
@@ -63,7 +62,7 @@ export function usePolish(update: UpdateTask) {
         return body;
       } catch (err) {
         if (ac.signal.aborted) return null; // task removed mid-flight — leave no trace
-        update(taskId, { status: "error", error: toPolishError(err) });
+        update(taskId, { status: "error", error: toPolishError(err, opts.lang) });
         return null;
       } finally {
         // Only delete OUR entry — a stale run must not remove a newer run's controller.

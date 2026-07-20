@@ -15,6 +15,7 @@ const OPTS = {
   providerId: "deepseek",
   adapter: "openai-compatible" as const,
   config: { apiKey: "k", model: "m", baseURL: "https://api.deepseek.com/v1" },
+  lang: "en" as const,
 };
 
 beforeEach(() => {

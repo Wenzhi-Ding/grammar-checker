@@ -20,30 +20,39 @@ describe("taskSnippet", () => {
 describe("formatRelTime", () => {
   const now = Date.parse("2026-07-16T12:00:00");
 
-  it("just now under a minute", () => {
-    expect(formatRelTime(now - 30_000, now)).toBe("刚刚");
+  it("English: just now / min / hr", () => {
+    expect(formatRelTime(now - 30_000, now)).toBe("just now");
+    expect(formatRelTime(now - 5 * 60_000, now)).toBe("5 min ago");
+    expect(formatRelTime(now - 3 * 3_600_000, now)).toBe("3 hr ago");
   });
 
-  it("minutes under an hour", () => {
-    expect(formatRelTime(now - 5 * 60_000, now)).toBe("5 分钟前");
+  it("Chinese: 刚刚 / 分钟前 / 小时前", () => {
+    expect(formatRelTime(now - 30_000, now, "zh")).toBe("刚刚");
+    expect(formatRelTime(now - 5 * 60_000, now, "zh")).toBe("5 分钟前");
+    expect(formatRelTime(now - 3 * 3_600_000, now, "zh")).toBe("3 小时前");
   });
 
-  it("hours under a day", () => {
-    expect(formatRelTime(now - 3 * 3_600_000, now)).toBe("3 小时前");
-  });
-
-  it("M-D beyond a day", () => {
+  it("M-D beyond a day (locale-independent)", () => {
     const ts = Date.parse("2026-07-10T08:00:00");
     expect(formatRelTime(ts, now)).toBe("7-10");
+    expect(formatRelTime(ts, now, "zh")).toBe("7-10");
   });
 });
 
 describe("taskStatusLabel", () => {
-  it("maps statuses, with unread done shown as 未读", () => {
-    expect(taskStatusLabel({ status: "running", unread: false })).toBe("进行中");
-    expect(taskStatusLabel({ status: "done", unread: true })).toBe("未读");
-    expect(taskStatusLabel({ status: "done", unread: false })).toBe("已完成");
-    expect(taskStatusLabel({ status: "error", unread: false })).toBe("失败");
-    expect(taskStatusLabel({ status: "interrupted", unread: false })).toBe("已中断");
+  it("English: maps statuses, with unread done shown as Unread", () => {
+    expect(taskStatusLabel({ status: "running", unread: false })).toBe("Running");
+    expect(taskStatusLabel({ status: "done", unread: true })).toBe("Unread");
+    expect(taskStatusLabel({ status: "done", unread: false })).toBe("Done");
+    expect(taskStatusLabel({ status: "error", unread: false })).toBe("Failed");
+    expect(taskStatusLabel({ status: "interrupted", unread: false })).toBe("Interrupted");
+  });
+
+  it("Chinese: 进行中 / 未读 / 已完成 / 失败 / 已中断", () => {
+    expect(taskStatusLabel({ status: "running", unread: false }, "zh")).toBe("进行中");
+    expect(taskStatusLabel({ status: "done", unread: true }, "zh")).toBe("未读");
+    expect(taskStatusLabel({ status: "done", unread: false }, "zh")).toBe("已完成");
+    expect(taskStatusLabel({ status: "error", unread: false }, "zh")).toBe("失败");
+    expect(taskStatusLabel({ status: "interrupted", unread: false }, "zh")).toBe("已中断");
   });
 });

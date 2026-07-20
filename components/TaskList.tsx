@@ -2,21 +2,24 @@
 "use client";
 import type { PolishTask } from "@/lib/tasks/types";
 import { formatRelTime, taskSnippet, taskStatusLabel } from "@/lib/tasks/format";
+import type { Locale } from "@/lib/i18n";
 
 interface TaskListProps {
   tasks: PolishTask[];
   focusedId: string | null;
   onPick: (id: string) => void;
   onRemove: (id: string) => void;
+  lang: Locale;
 }
 
-export function TaskList({ tasks, focusedId, onPick, onRemove }: TaskListProps) {
+export function TaskList({ tasks, focusedId, onPick, onRemove, lang }: TaskListProps) {
+  const zh = lang === "zh";
   // eslint-disable-next-line react-hooks/purity -- relative timestamps must be computed per render; the list re-renders on every task update, so "now" staleness is bounded
   const now = Date.now();
   return (
     <aside className="gp-tasks">
-      <div className="gp-tasks-title">任务</div>
-      {tasks.length === 0 && <div className="gp-tasks-empty">暂无任务</div>}
+      <div className="gp-tasks-title">{zh ? "任务" : "Tasks"}</div>
+      {tasks.length === 0 && <div className="gp-tasks-empty">{zh ? "暂无任务" : "No tasks yet"}</div>}
       <ul className="gp-tasks-list">
         {tasks.map((t) => {
           const cls = [
@@ -40,17 +43,21 @@ export function TaskList({ tasks, focusedId, onPick, onRemove }: TaskListProps) 
                 </span>
                 <span className="gp-task-meta">
                   <span className={`gp-task-status gp-task-status-${t.status}`}>
-                    {t.status === "running" ? `进行中 ≈${t.approxTokens} tok` : taskStatusLabel(t)}
+                    {t.status === "running"
+                      ? zh
+                        ? `进行中 ≈${t.approxTokens} tok`
+                        : `Running ≈${t.approxTokens} tok`
+                      : taskStatusLabel(t, lang)}
                   </span>
                   <span className="gp-task-model">{t.model}</span>
-                  <span className="gp-task-time">{formatRelTime(t.createdAt, now)}</span>
+                  <span className="gp-task-time">{formatRelTime(t.createdAt, now, lang)}</span>
                 </span>
               </button>
               <button
                 type="button"
                 className="gp-task-remove"
-                title="删除"
-                aria-label="删除"
+                title={zh ? "删除" : "Delete"}
+                aria-label={zh ? "删除" : "Delete"}
                 onClick={() => onRemove(t.id)}
               >
                 ×

@@ -26,10 +26,15 @@ describe("toPolishError", () => {
 
   it("classifies PolishParseError as schema with a clear retry/stronger-model hint", () => {
     const err = new PolishParseError("not json at all", new SyntaxError("Unexpected token"));
-    const out = toPolishError(err);
-    expect(out).toMatchObject({ kind: "schema", retryable: true });
-    expect(out.message).toContain("格式解析失败");
-    expect(out.message).toContain("更强的模型");
+    const en = toPolishError(err);
+    expect(en).toMatchObject({ kind: "schema", retryable: true });
+    expect(en.message).toContain("Could not parse");
+    expect(en.message).toContain("stronger");
+
+    const zh = toPolishError(err, "zh");
+    expect(zh).toMatchObject({ kind: "schema", retryable: true });
+    expect(zh.message).toContain("格式解析失败");
+    expect(zh.message).toContain("更强的模型");
   });
 
   it("classifies proxy-tagged kind:'schema' as schema even without a PolishParseError", () => {
