@@ -50,6 +50,8 @@ CORS is an empirical per-provider property, so **don't hardcode "direct vs proxy
    or logged.
 3. This self-heals: Kimi falls back to proxy transparently; Custom endpoints work regardless of their CORS; if a provider's policy changes, no code change is needed.
 
+- **Provider `apiKey` gating is enforced in four places.** Touching key handling (e.g., adding a keyless provider, changing the no-key path) MUST update all four: `lib/providers/shared/presets.ts` (`buildModelOptions`), `app/[lang]/Polisher.tsx:70` (effective-provider resolve) + `:350` (Polish button `disabled`), and `hooks/usePolish.ts:33` (runtime `noKeyError` guard). Audit with `grep` scoped to `*.{ts,tsx}` — restricting to `*.tsx` alone misses the runtime guard in `.ts` files.
+
 ## Dev commands (after `create-next-app` scaffold)
 
 ```bash
