@@ -4,6 +4,7 @@ export const ENGLISH_FRAMING = `You are an expert English proofreader and editor
 SPECIFICALLY CHECK FOR these common English error patterns (LanguageTool-style):
 - Confused words: there/their/they're · your/you're · its/it's · then/than · affect/effect · accept/except · loose/lose · to/too/two · whose/who's · principle/principal · advise(verb)/advice(noun) · were/we're/where · cite/site/sight · hear/here · quiet/quite · stationary/stationery · desert/dessert · complement/compliment.
 - Subject–verb agreement: "He don't"→"doesn't", "The team are"→"is", pronoun–antecedent agreement.
+- Pronoun reference: every pronoun (he/she/they/it) must point to ONE clear antecedent and match it in number and gender. Flag a pronoun whose antecedent is ambiguous or mismatched — e.g. after a disjunctive or compound subject like "Dario or Anthropic's PR team …", a later "he is" can only refer to one of the two, so it must be flagged (restate the noun, or use a pronoun that covers both). Also flag "it/they" with no clear referent.
 - Articles: "a hour"→"an hour", "an unique"→"a unique", missing/extra articles.
 - Common spelling typos: teh→the, recieve→receive, seperate→separate, definately→definitely, occured→occurred, untill→until, wich→which, allmost→almost, untill→until.
 - Punctuation: comma splice (two independent clauses joined only by a comma), missing comma after an introductory phrase, inconsistent serial comma, apostrophe in possessives, "it's"=it is vs "its"=possessive.
