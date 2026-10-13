@@ -9,7 +9,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: "Grammar Checker",
     short_name: "Grammar",
     description:
-      "Free AI grammar checker & proofreader. BYOK — supports DeepSeek, Gemini, GLM, Kimi.",
+      "Free AI grammar checker & proofreader. BYOK — supports DeepSeek, Gemini, GLM, Kimi, OpenAI.",
     start_url: "/en",
     display: "standalone",
     background_color: "#f8f9fa",

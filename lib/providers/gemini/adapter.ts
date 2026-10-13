@@ -59,7 +59,7 @@ function buildBody(text: string, config: ProviderConfig): string {
 
 /** Streaming request shared by the browser direct call and the /api/polish proxy route. */
 export function buildStreamRequest(text: string, config: ProviderConfig): StreamRequest {
-  const model = config.model || "gemini-3.5-flash";
+  const model = config.model || "gemini-3.8-flash";
   return {
     url: `https://generativelanguage.googleapis.com/v1beta/models/${model}:streamGenerateContent?alt=sse&key=${encodeURIComponent(config.apiKey)}`,
     init: {
@@ -100,7 +100,7 @@ export function createGeminiProvider({ fetchImpl }: AdapterOpts = {}): Provider 
   return {
     id: "gemini",
     async polish(text: string, config: ProviderConfig): Promise<PolishResult> {
-      const model = config.model || "gemini-3.5-flash";
+      const model = config.model || "gemini-3.8-flash";
       const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${encodeURIComponent(config.apiKey)}`;
       const res = await fetchFn(url, {
         method: "POST",

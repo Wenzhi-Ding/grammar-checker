@@ -1,6 +1,6 @@
 // eval/run.ts
 // Eval harness: run grammar test cases through the app's REAL prompt-assembly +
-// openai-compatible adapter (deepseek-v4-flash by default), then have deepseek-v4-pro
+// openai-compatible adapter (deepseek-flash by default), then have deepseek-v4-pro
 // judge each result against the case's reference points (score 0–7).
 //
 // Usage:
@@ -39,7 +39,7 @@ interface CaseOutcome {
 }
 
 function parseFlags(argv: string[]): Flags {
-  const flags: Flags = { cases: [], testModel: "deepseek-v4-flash", judgeModel: "deepseek-v4-pro" };
+  const flags: Flags = { cases: [], testModel: "deepseek-flash", judgeModel: "deepseek-v4-pro" };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     const next = () => argv[++i];

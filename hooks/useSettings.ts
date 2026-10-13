@@ -15,8 +15,9 @@ export interface Settings {
   customInstructions: string;
 }
 
-const STORAGE_KEY = "grammar-polisher.settings.v9";
+const STORAGE_KEY = "grammar-polisher.settings.v10";
 const LEGACY_KEYS = [
+  "grammar-polisher.settings.v9",
   "grammar-polisher.settings.v8",
   "grammar-polisher.settings.v7",
   "grammar-polisher.settings.v6",
@@ -30,7 +31,7 @@ const LEGACY_KEYS = [
 const DEFAULTS: Settings = {
   providers: defaultProviders(),
   selectedProviderId: "deepseek",
-  selectedModel: "deepseek-v4-flash",
+  selectedModel: "deepseek-flash",
   language: "auto",
   reasonLanguage: "auto",
   customInstructions: "",
@@ -45,10 +46,17 @@ function migrate(parsed: Partial<Settings>): Settings {
     ...fresh.map((p) => ({ ...p, apiKey: old.find((s) => s.id === p.id)?.apiKey ?? "" })),
     ...old.filter((s) => !s.builtin),
   ];
+  // Re-seeded builtin lists may no longer contain the stored selection (retired
+  // model id) — fall back to the new default instead of shipping a dead model.
+  const storedModel = parsed.selectedModel;
+  const selectedModel =
+    storedModel && providers.some((p) => p.models.includes(storedModel))
+      ? storedModel
+      : DEFAULTS.selectedModel;
   return {
     ...DEFAULTS,
     selectedProviderId: parsed.selectedProviderId ?? DEFAULTS.selectedProviderId,
-    selectedModel: parsed.selectedModel ?? DEFAULTS.selectedModel,
+    selectedModel,
     language: parsed.language ?? DEFAULTS.language,
     reasonLanguage: parsed.reasonLanguage ?? DEFAULTS.reasonLanguage,
     providers,

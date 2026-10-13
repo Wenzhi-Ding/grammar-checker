@@ -82,8 +82,8 @@ export default async function OgImage({ params }: Props) {
           }}
         >
           {isZh
-            ? "BYOK · 支持 DeepSeek / Gemini / GLM / Kimi · 纯前端 · 无需注册"
-            : "BYOK · DeepSeek / Gemini / GLM / Kimi · in-browser · no signup"}
+            ? "BYOK · 支持 DeepSeek / Gemini / GLM / Kimi / OpenAI · 纯前端 · 无需注册"
+            : "BYOK · DeepSeek / Gemini / GLM / Kimi / OpenAI · in-browser · no signup"}
         </div>
         <div
           style={{

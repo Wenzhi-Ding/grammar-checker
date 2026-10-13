@@ -7,7 +7,7 @@ export const zh: Strings = {
   ogLocale: "zh_CN",
   title: "Grammar Checker — 免费 AI 英语语法检查与润色工具",
   metaDescription:
-    "免费 AI 英语语法检查与润色工具。粘贴文本即可获得逐条修改建议与解释，编辑器内直接接受或拒绝。BYOK 自带 Key，支持 DeepSeek、Gemini、GLM、Kimi。无需注册，纯前端运行，文本不上传任何服务器。",
+    "免费 AI 英语语法检查与润色工具。粘贴文本即可获得逐条修改建议与解释，编辑器内直接接受或拒绝。BYOK 自带 Key，支持 DeepSeek、Gemini、GLM、Kimi、OpenAI。无需注册，纯前端运行，文本不上传任何服务器。",
   metaKeywords: [
     "语法检查",
     "英语润色",
@@ -24,12 +24,12 @@ export const zh: Strings = {
   ],
   heroH1: "免费 AI 英语语法检查与润色工具",
   heroSub:
-    "粘贴文本，逐句获得带原因的修改建议，编辑器内直接接受或拒绝。自带 API Key，文本与 Key 仅存于浏览器，绝不上传。每次润色约 ¥0.004——Grammarly 一年 $144，这里一年不到 $2。",
+    "粘贴文本，逐句获得带原因的修改建议，编辑器内直接接受或拒绝。自带 API Key，文本与 Key 仅存于浏览器，绝不上传。每次润色约 $0.001（约 ¥0.007）——Grammarly 一年 $144，这里一年不到 $3。",
   features: [
     {
       title: "BYOK 自带 API Key",
       body:
-        "粘贴你自己的 DeepSeek、Gemini、GLM 或 Kimi API Key 即可使用。无需注册、无需订阅。按 DeepSeek V4 Flash 估算，单次润色约 ¥0.004，Grammarly 一年的 $144 订阅费够你润色 20 万次以上。",
+        "粘贴你自己的 DeepSeek、Gemini、GLM、Kimi 或 OpenAI API Key 即可使用。无需注册、无需订阅。按 DeepSeek Flash 错峰价估算（高峰时段翻倍），单次润色约 $0.001（约 ¥0.007），Grammarly 一年的 $144 订阅费够你润色 14 万次以上。",
     },
     {
       title: "纯前端运行",
@@ -44,7 +44,7 @@ export const zh: Strings = {
     {
       title: "多模型多服务商",
       body:
-        "支持 DeepSeek、Gemini、GLM、Kimi，或任何 OpenAI 兼容接口。一键添加自定义服务商。",
+        "支持 DeepSeek、Gemini、GLM、Kimi、OpenAI，或任何 OpenAI 兼容接口。一键添加自定义服务商。",
     },
     {
       title: "本地任务历史",
@@ -82,12 +82,12 @@ export const zh: Strings = {
     },
     {
       q: "我的邮件内容安全吗？",
-      a: "文本在你的浏览器内处理，再发往你配置的 LLM 服务商（DeepSeek、Gemini、GLM 或 Kimi）。我们没有持久化后端，不存储、不记录、不缓存你的任何输入。",
+      a: "文本在你的浏览器内处理，再发往你配置的 LLM 服务商（DeepSeek、Gemini、GLM、Kimi 或 OpenAI）。我们没有持久化后端，不存储、不记录、不缓存你的任何输入。",
     },
     // 工具与 BYOK
     {
       q: "和 Grammarly 有什么区别？",
-      a: "Grammarly 需要账号，并把你的文本发到它的服务器。Grammar Checker 是免费、开源、BYOK 模式的工具：你自带 LLM API Key，编辑器在浏览器内运行，无需注册。支持 DeepSeek、Gemini、GLM、Kimi，可自由选择最适合你写作风格的模型。",
+      a: "Grammarly 需要账号，并把你的文本发到它的服务器。Grammar Checker 是免费、开源、BYOK 模式的工具：你自带 LLM API Key，编辑器在浏览器内运行，无需注册。支持 DeepSeek、Gemini、GLM、Kimi、OpenAI，可自由选择最适合你写作风格的模型。",
     },
     {
       q: "BYOK 是什么意思？",
@@ -95,15 +95,15 @@ export const zh: Strings = {
     },
     {
       q: "用 DeepSeek 润色一次大概多少钱？",
-      a: "以 DeepSeek V4 Flash 官方定价估算（输入 $0.14/百万 tokens，输出 $0.28/百万 tokens）：润色一段约 400 词的英文，约消耗 1800 输入 tokens（含系统提示词）和 1200 输出 tokens（修改建议 JSON），单次成本约 $0.0006（约合人民币 0.004 元）——大约润色 1600 次才花 1 美元。短邮件更低，但即使 500 词以上的长段落也很少超过 $0.001。其他模型（Gemini、GLM、Kimi）单价略高，但同一数量级。",
+      a: "以 DeepSeek Flash 官方错峰价估算（输入 $0.15/百万 tokens，输出 $0.6/百万 tokens，高峰时段翻倍）：润色一段约 400 词的英文，约消耗 1800 输入 tokens（含系统提示词）和 1200 输出 tokens（修改建议 JSON），单次成本约 $0.001（约合人民币 0.007 元）——大约润色 1000 次才花 1 美元。短邮件更低，但即使 500 词以上的长段落也很少超过 $0.002。其他模型（Gemini、GLM、Kimi、OpenAI）单价在同一数量级。",
     },
     {
       q: "BYOK 比 Grammarly 订阅便宜多少？",
-      a: "Grammarly Pro 年费 $144（$12/月）。同样的钱用 DeepSeek V4 Flash 够润色 20 万次以上。一个高强度用户（每天写英文邮件 + 作业，一年约 1500–3000 次润色）一年的 LLM 费用通常不到 $2，不到 Grammarly 年费的 2%。即便每天润色 50 次的极端重度用户，一年也只要约 $11。",
+      a: "Grammarly Pro 年费 $144（$12/月）。同样的钱用 DeepSeek Flash 够润色 14 万次以上。一个高强度用户（每天写英文邮件 + 作业，一年约 1500–3000 次润色）一年的 LLM 费用通常不到 $3（约 ¥22），约占 Grammarly 年费的 2%。即便每天润色 50 次的极端重度用户，一年也只要约 $18。",
     },
     {
       q: "支持哪些 AI 模型？",
-      a: "内置支持 DeepSeek、Kimi（Moonshot）、GLM（智谱）、Google Gemini。你也可以在设置面板添加任何 OpenAI 兼容接口或 Gemini 兼容接口作为自定义服务商。",
+      a: "内置支持 DeepSeek、Kimi（Moonshot）、GLM（智谱）、Google Gemini 和 OpenAI。你也可以在设置面板添加任何 OpenAI 兼容接口或 Gemini 兼容接口作为自定义服务商。",
     },
     {
       q: "我的数据会被存储吗？",

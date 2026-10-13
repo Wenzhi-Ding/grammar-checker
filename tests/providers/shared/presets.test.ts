@@ -16,6 +16,7 @@ describe("providers", () => {
       "glm",
       "kimi",
       "ollama",
+      "openai",
     ]);
     expect(BUILTIN_PROVIDERS.every((p) => p.builtin && p.apiKey === "")).toBe(true);
   });
@@ -31,6 +32,18 @@ describe("providers", () => {
     expect(ollama?.adapter).toBe("openai-compatible");
     expect(ollama?.baseURL).toBe("http://localhost:11434/v1");
     expect(ollama?.models).toEqual([]);
+  });
+
+  // Pinned so stale defaults (retired upstream model ids) can't slip back in —
+  // refresh this list whenever the provider docs change, verifying each id
+  // against official docs first.
+  it("seeds current default model lists for the keyed builtins", () => {
+    const models = (id: string) => BUILTIN_PROVIDERS.find((p) => p.id === id)!.models;
+    expect(models("deepseek")).toEqual(["deepseek-flash", "deepseek-v4-pro"]);
+    expect(models("kimi")).toEqual(["kimi-k3", "kimi-k2.6"]);
+    expect(models("glm")).toEqual(["glm-5.3", "glm-5.3-flash"]);
+    expect(models("gemini")).toEqual(["gemini-3.8-flash", "gemini-3.1-pro-preview"]);
+    expect(models("openai")).toEqual(["gpt-6-luna", "gpt-6.1-sol"]);
   });
 
   it("defaultProviders returns fresh copies (no shared model-array refs)", () => {
@@ -69,7 +82,7 @@ describe("providers", () => {
 
   it("buildModelOptions still excludes keyed providers with empty API key", () => {
     const ps = defaultProviders();
-    // deepseek/kimi/glm/gemini all have requiresKey:true and empty apiKey
+    // deepseek/kimi/glm/gemini/openai all have requiresKey:true and empty apiKey
     const opts = buildModelOptions(ps);
     expect(opts.filter((o) => o.provider.id !== "ollama")).toHaveLength(0);
   });
@@ -93,6 +106,6 @@ describe("providers", () => {
     expect(merged.find((p) => p.id === "deepseek")?.apiKey).toBe("kept");
     expect(merged.find((p) => p.id === "deepseek")?.baseURL).toBe("https://edited");
     // missing built-ins filled in
-    expect(merged.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi", "ollama"]);
+    expect(merged.map((p) => p.id).sort()).toEqual(["deepseek", "gemini", "glm", "kimi", "ollama", "openai"]);
   });
 });

@@ -2,6 +2,30 @@
 
 All notable changes to this project are documented here. Version numbers follow the `version` field in `package.json`.
 
+## [0.1.3] - 2026-10-13
+
+### Added
+
+- **OpenAI as a fifth built-in provider** (`api.openai.com/v1`, OpenAI-compatible adapter, direct call with the same CORS proxy fallback as everyone else): models `gpt-6-luna` and `gpt-6.1-sol`. This reverses the earlier "OpenAI deliberately not supported" decision (Anthropic remains unsupported). Existing users get it automatically via `mergeProviders`' fill-in of missing built-ins — no storage-key bump needed.
+
+### Changed
+
+- SEO/GEO copy updated to mention OpenAI (meta description, hero, features, FAQ, PWA manifest, OG image, README en/zh) and to fix stale cost references still citing the retired "DeepSeek V4 Flash" pricing ($0.0006/polish) — now DeepSeek Flash off-peak ($0.15/M in, $0.6/M out, ≈$0.001/polish, $144 ≈ 140,000+ polishes).
+
+## [0.1.2] - 2026-10-13
+
+### Changed
+
+- Refreshed the built-in default model lists against each provider's official docs (verified 2026-10-13):
+  - **DeepSeek**: `deepseek-v4-flash` → `deepseek-flash` (V4.1-Flash; the old id is retired upstream and now billed as Flash). `deepseek-v4-pro` unchanged.
+  - **Kimi/Moonshot**: `kimi-k2.7` (no longer offered as a general model) → `kimi-k3` (flagship); `kimi-k2.6` kept. Key URL updated to `platform.kimi.com` (docs portal moved; API host `api.moonshot.cn/v1` unchanged).
+  - **GLM/智谱**: `glm-5.2` → `glm-5.3` + `glm-5.3-flash`.
+  - **Gemini**: `gemini-3.5-flash` (auto-routes to 3.6-flash) → `gemini-3.8-flash` + `gemini-3.1-pro-preview` (the only Pro currently offered, preview tier).
+- Settings storage key bumped `v9` → `v10`: existing users get the fresh builtin model lists re-seeded on next load (saved API keys and custom providers are carried over; the previously selected model is kept unless it no longer exists in any provider list, in which case it falls back to `deepseek-flash`).
+- Gemini adapter fallback (`config.model || "…"`) and eval-harness default test model updated to the new ids.
+- README (en/zh): recommended model and cost section recomputed for DeepSeek Flash pricing ($0.15/M input, $0.6/M output off-peak — about $0.001 per polish).
+- Test infra: vitest 4 + jsdom 29 stopped populating `window.localStorage` into the test global (8 `useTasks` tests red on a clean checkout). `vitest.setup.ts` now borrows the real Storage from the environment's jsdom driver window, keeping `Storage.prototype` spies working.
+
 ## [0.1.1] - 2026-08-01
 
 ### Added

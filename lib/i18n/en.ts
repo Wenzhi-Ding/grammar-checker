@@ -7,7 +7,7 @@ export const en: Strings = {
   ogLocale: "en_US",
   title: "Grammar Checker — Free AI Proofreader & Polisher",
   metaDescription:
-    "Free AI grammar checker & proofreader. Paste your text, get inline corrections with explanations. BYOK — supports DeepSeek, Gemini, GLM, and Kimi. No signup, no server-side storage.",
+    "Free AI grammar checker & proofreader. Paste your text, get inline corrections with explanations. BYOK — supports DeepSeek, Gemini, GLM, Kimi, and OpenAI. No signup, no server-side storage.",
   metaKeywords: [
     "grammar checker",
     "grammar check",
@@ -24,12 +24,12 @@ export const en: Strings = {
   ],
   heroH1: "Free AI Grammar Checker & Proofreader",
   heroSub:
-    "Paste your text and get inline, per-span corrections with one-line reasons. Bring your own API key — your text and key never leave your browser. At ~$0.0006 per polish, a year of heavy use costs under $2 — versus Grammarly's $144.",
+    "Paste your text and get inline, per-span corrections with one-line reasons. Bring your own API key — your text and key never leave your browser. At ~$0.001 per polish, a year of heavy use costs under $3 — versus Grammarly's $144.",
   features: [
     {
       title: "Bring your own key (BYOK)",
       body:
-        "Paste your own API key for DeepSeek, Gemini, GLM, or Kimi. No accounts, no subscription. At DeepSeek V4 Flash rates, one polish costs about $0.0006 — the $144 you'd spend on a year of Grammarly buys 200,000+ polishes.",
+        "Paste your own API key for DeepSeek, Gemini, GLM, Kimi, or OpenAI. No accounts, no subscription. At DeepSeek Flash rates, one polish costs about $0.001 — the $144 you'd spend on a year of Grammarly buys 140,000+ polishes.",
     },
     {
       title: "Runs entirely in your browser",
@@ -44,7 +44,7 @@ export const en: Strings = {
     {
       title: "Multi-model, multi-provider",
       body:
-        "Switch between DeepSeek, Gemini, GLM, Kimi, or any OpenAI-compatible endpoint. Add custom providers in one click.",
+        "Switch between DeepSeek, Gemini, GLM, Kimi, OpenAI, or any OpenAI-compatible endpoint. Add custom providers in one click.",
     },
     {
       title: "Local task history",
@@ -82,12 +82,12 @@ export const en: Strings = {
     },
     {
       q: "Is my email content safe?",
-      a: "Your text is processed in the browser and sent to the LLM provider you configured (DeepSeek, Gemini, GLM, or Kimi). We run no persistent backend — nothing you type is stored, logged, or cached.",
+      a: "Your text is processed in the browser and sent to the LLM provider you configured (DeepSeek, Gemini, GLM, Kimi, or OpenAI). We run no persistent backend — nothing you type is stored, logged, or cached.",
     },
     // Tool & BYOK
     {
       q: "How is this different from Grammarly?",
-      a: "Grammarly requires an account and routes your text through its servers. Grammar Checker is a free, open-source BYOK tool: you bring your own LLM API key, the editor runs in your browser, and there is no signup. It supports DeepSeek, Gemini, GLM, and Kimi, letting you pick the model that best fits your writing.",
+      a: "Grammarly requires an account and routes your text through its servers. Grammar Checker is a free, open-source BYOK tool: you bring your own LLM API key, the editor runs in your browser, and there is no signup. It supports DeepSeek, Gemini, GLM, Kimi, and OpenAI, letting you pick the model that best fits your writing.",
     },
     {
       q: "What does BYOK mean?",
@@ -95,15 +95,15 @@ export const en: Strings = {
     },
     {
       q: "How much does a single polish cost with DeepSeek?",
-      a: "Using DeepSeek V4 Flash official pricing ($0.14 per million input tokens, $0.28 per million output tokens): polishing a ~400-word English passage consumes about 1,800 input tokens (including the system prompt) and 1,200 output tokens (the corrections JSON), for a per-polish cost of roughly $0.0006 — it would take about 1,600 polishes to spend one US dollar. Short emails cost less, and even 500+ word passages rarely exceed $0.001. Other models (Gemini, GLM, Kimi) are slightly pricier but in the same order of magnitude.",
+      a: "Using DeepSeek Flash official off-peak pricing ($0.15 per million input tokens, $0.6 per million output tokens; double at peak hours): polishing a ~400-word English passage consumes about 1,800 input tokens (including the system prompt) and 1,200 output tokens (the corrections JSON), for a per-polish cost of roughly $0.001 — it would take about 1,000 polishes to spend one US dollar. Short emails cost less, and even 500+ word passages rarely exceed $0.002. Other models (Gemini, GLM, Kimi, OpenAI) are in the same order of magnitude.",
     },
     {
       q: "How much cheaper is BYOK than a Grammarly subscription?",
-      a: "Grammarly Pro costs $144/year ($12/month). The same $144 buys 200,000+ polishes on DeepSeek V4 Flash. A heavy user (English emails plus assignments every day, around 1,500–3,000 polishes/year) typically spends under $2/year on LLM tokens — less than 2% of Grammarly's annual price. Even a power user polishing 50 times a day would spend only ~$11/year.",
+      a: "Grammarly Pro costs $144/year ($12/month). The same $144 buys 140,000+ polishes on DeepSeek Flash. A heavy user (English emails plus assignments every day, around 1,500–3,000 polishes/year) typically spends under $3/year on LLM tokens — about 2% of Grammarly's annual price. Even a power user polishing 50 times a day would spend only ~$18/year.",
     },
     {
       q: "Which AI models are supported?",
-      a: "Out of the box: DeepSeek, Kimi (Moonshot), GLM (Zhipu), and Google Gemini. You can also add any OpenAI-compatible endpoint as a custom provider, or any Gemini-compatible endpoint, in the settings panel.",
+      a: "Out of the box: DeepSeek, Kimi (Moonshot), GLM (Zhipu), Google Gemini, and OpenAI. You can also add any OpenAI-compatible endpoint as a custom provider, or any Gemini-compatible endpoint, in the settings panel.",
     },
     {
       q: "Is my data stored?",
